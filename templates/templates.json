@@ -1,14 +1,20 @@
 [
   {
-    "id": "partitella",
-    "name": "PARTITELLA",
+    "id": "Partitella Arena",
+    "name": "Partitella Arena",
     "image": "./templates/Template figurina partitella.png",
     "dominantColor": "#FF4A00"
   },
   {
-    "id": "queens",
-    "name": "QUEENS",
+    "id": "Queens' Arena",
+    "name": "Queens' Arena",
     "image": "./templates/Template figurina queens.png",
     "dominantColor": "#BA275E"
+  }
+  {
+    "id": "Standard Partitella",
+    "name": "Standard Partitella",
+    "image": "./templates/Template figurina queens.png",
+    "dominantColor": "#FF4A00"
   }
 ]
