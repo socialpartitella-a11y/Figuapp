@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Figuapp</title>
+  <link rel="stylesheet" href="./styles/fugaz.css">
+</head>
+<body>
+  <main id="app">
+    <div class="app-shell">
+      <div class="topbar">
+        <div class="badge">FIGUAPP</div>
+        <div class="badge" id="stepBadge">STEP 1 DI 4</div>
+      </div>
+
+      <section class="screen" id="screen-template">
+        <div class="card stack">
+          <h1 class="hero-title">SCEGLI IL TEMPLATE</h1>
+          <p>Seleziona il template che vuoi usare per creare la figurina.</p>
+        </div>
+
+        <div class="template-grid" id="templateGrid"></div>
+
+        <div class="actions">
+          <button class="primary" id="goToPlayer" disabled>CONTINUA</button>
+        </div>
+      </section>
+
+      <section class="screen hidden" id="screen-player">
+        <div class="card stack">
+          <h2>PROFILO</h2>
+          <p>Scegli un profilo esistente oppure inserisci cognome, nome e numero.</p>
+        </div>
+
+        <div class="card form-grid">
+          <label class="label" for="playerSelect">PROFILI SALVATI</label>
+          <select id="playerSelect">
+            <option value="">SELEZIONA UN PROFILO</option>
+          </select>
+        </div>
+
+        <div class="card form-grid">
+          <label class="label" for="lastName">COGNOME</label>
+          <input id="lastName" type="text" placeholder="COGNOME">
+
+          <label class="label" for="firstName">NOME</label>
+          <input id="firstName" type="text" placeholder="NOME">
+
+          <label class="label" for="number">NUMERO</label>
+          <input id="number" type="text" inputmode="numeric" placeholder="10" maxlength="3">
+        </div>
+
+        <div class="actions two">
+          <button class="secondary" id="savePlayer">SALVA PROFILO</button>
+          <button class="primary" id="goToPhoto">CONTINUA</button>
+        </div>
+
+        <div class="actions">
+          <button class="ghost" data-back="template">INDIETRO</button>
+        </div>
+      </section>
+
+      <section class="screen hidden" id="screen-photo">
+        <div class="card stack">
+          <h2>FOTO</h2>
+          <p>Puoi scattare una foto, selezionarla dal rullino oppure scegliere un file.</p>
+        </div>
+
+        <div class="card photo-actions">
+          <button class="secondary" id="cameraButton">SCATTA FOTO</button>
+          <button class="secondary" id="galleryButton">RULLINO FOTO</button>
+          <button class="secondary" id="fileButton">SCEGLI DA FILE</button>
+          <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden">
+          <input id="galleryInput" type="file" accept="image/*" class="hidden">
+          <input id="fileInput" type="file" accept="image/*" class="hidden">
+        </div>
+
+        <div class="card preview-shell">
+          <h3>ANTEPRIMA FOTO</h3>
+          <div class="preview-frame" id="photoPreviewFrame">
+            <p class="note">NESSUNA FOTO SELEZIONATA</p>
+          </div>
+        </div>
+
+        <div class="actions two">
+          <button class="secondary" data-back="player">INDIETRO</button>
+          <button class="primary" id="goToPreview" disabled>GENERA FIGURINA</button>
+        </div>
+      </section>
+
+      <section class="screen hidden" id="screen-preview">
+        <div class="card stack">
+          <h2>FIGURINA</h2>
+          <p>Qui vedrai la composizione finale con foto, template e dati del profilo.</p>
+        </div>
+
+        <div class="card preview-shell">
+          <div class="preview-frame" id="finalPreviewFrame">
+            <p class="note">ANTEPRIMA NON ANCORA GENERATA</p>
+          </div>
+        </div>
+
+        <div class="actions two">
+          <button class="secondary" id="saveToFiles">SALVA</button>
+          <button class="primary" id="shareCard">CONDIVIDI</button>
+        </div>
+
+        <div class="actions">
+          <button class="ghost" data-back="photo">INDIETRO</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <canvas id="renderCanvas" width="1080" height="1520" hidden></canvas>
+
+  <script>
+    const state = {
+      templates: [],
+      players: [],
+      selectedTemplate: null,
+      selectedPlayer: null,
+      photoFile: null,
+      photoDataUrl: null,
+      finalCardDataUrl: null
+    };
+
+    const screens = {
+      template: document.getElementById('screen-template'),
+      player: document.getElementById('screen-player'),
+      photo: document.getElementById('screen-photo'),
+      preview: document.getElementById('screen-preview')
+    };
+
+    const stepBadge = document.getElementById('stepBadge');
+    const templateGrid = document.getElementById('templateGrid');
+    const playerSelect = document.getElementById('playerSelect');
+    const firstNameInput = document.getElementById('firstName');
+    const lastNameInput = document.getElementById('lastName');
+    const numberInput = document.getElementById('number');
+    const photoPreviewFrame = document.getElementById('photoPreviewFrame');
+    const finalPreviewFrame = document.getElementById('finalPreviewFrame');
+    const goToPlayerButton = document.getElementById('goToPlayer');
+    const goToPreviewButton = document.getElementById('goToPreview');
+    const cameraInput = document.getElementById('cameraInput');
+    const galleryInput = document.getElementById('galleryInput');
+    const fileInput = document.getElementById('fileInput');
+    const renderCanvas = document.getElementById('renderCanvas');
+    const ctx = renderCanvas.getContext('2d');
+
+    function showScreen(name) {
+      const order = ['template', 'player', 'photo', 'preview'];
+      Object.entries(screens).forEach(([key, screen]) => {
+        screen.classList.toggle('hidden', key !== name);
+      });
+      stepBadge.textContent = `STEP ${order.indexOf(name) + 1} DI 4`;
+    }
+
+    async function loadTemplates() {
+      const response = await fetch(`./templates/templates.json?v=${Date.now()}`);
+      state.templates = await response.json();
+      renderTemplates();
+    }
+
+    async function loadPlayers() {
+      const response = await fetch('./players.json');
+      state.players = await response.json();
+      renderPlayers();
+    }
+
+    function renderTemplates() {
+      templateGrid.innerHTML = '';
+      state.templates.forEach((template) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'template-card';
+        button.style.background = `linear-gradient(180deg, ${template.dominantColor} 0%, #111 100%)`;
+        button.innerHTML = `
+          <div class="template-title">
+            <div>
+              <h3>${template.name}</h3>
+              <p>TEMPLATE EVENTO</p>
+            </div>
+            <span class="color-dot" style="background:${template.dominantColor}"></span>
+          </div>
+        `;
+        button.addEventListener('click', () => {
+          state.selectedTemplate = template;
+          goToPlayerButton.disabled = false;
+          [...templateGrid.children].forEach((child) => {
+            child.style.outline = 'none';
+            child.style.transform = 'scale(1)';
+          });
+          button.style.outline = `3px solid ${template.dominantColor}`;
+          button.style.outlineOffset = '2px';
+          button.style.transform = 'scale(0.985)';
+        });
+        templateGrid.appendChild(button);
+      });
+    }
+
+    function renderPlayers() {
+      playerSelect.innerHTML = '<option value="">SELEZIONA UN PROFILO</option>';
+      const sortedPlayers = [...state.players].sort((a, b) => {
+        const lastNameCompare = (a.lastName || '').localeCompare(b.lastName || '', 'it', { sensitivity: 'base' });
+        if (lastNameCompare !== 0) return lastNameCompare;
+        return (a.firstName || '').localeCompare(b.firstName || '', 'it', { sensitivity: 'base' });
+      });
+      sortedPlayers.forEach((player) => {
+        const option = document.createElement('option');
+        option.value = player.id;
+        option.textContent = `${player.lastName} ${player.firstName} #${player.number}`;
+        playerSelect.appendChild(option);
+      });
+    }
+
+    function fillPlayerForm(player) {
+      firstNameInput.value = player.firstName || '';
+      lastNameInput.value = player.lastName || '';
+      numberInput.value = player.number || '';
+    }
+
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    function fitImageCover(image, width, height) {
+      const scale = Math.max(width / image.width, height / image.height);
+      const drawWidth = image.width * scale;
+      const drawHeight = image.height * scale;
+      const x = (width - drawWidth) / 2;
+      const y = (height - drawHeight) / 2;
+      return { x, y, drawWidth, drawHeight };
+    }
+
+    async function handlePhotoSelection(file) {
+      if (!file) return;
+      state.photoFile = file;
+      state.photoDataUrl = await readFile(file);
+      photoPreviewFrame.innerHTML = `<img src="${state.photoDataUrl}" alt="ANTEPRIMA FOTO">`;
+      goToPreviewButton.disabled = false;
+    }
+
+    function triggerFileInput(input) {
+      if (typeof input.showPicker === 'function') {
+        input.showPicker().catch(() => input.click());
+      } else {
+        input.click();
+      }
+    }
+
+    function normalizeTap(button, handler) {
+      button.addEventListener('click', handler);
+      button.addEventListener('touchend', (event) => {
+        event.preventDefault();
+        handler();
+      }, { passive: false });
+    }
+
+    function savePlayerProfile() {
+      const firstName = firstNameInput.value.trim().toUpperCase();
+      const lastName = lastNameInput.value.trim().toUpperCase();
+      const number = numberInput.value.trim().toUpperCase();
+      if (!firstName || !lastName || !number) return;
+
+      const duplicatePlayer = state.players.find((player) =>
+        (player.firstName || '').toUpperCase() === firstName &&
+        (player.lastName || '').toUpperCase() === lastName &&
+        String(player.number || '').toUpperCase() === number
+      );
+
+      if (duplicatePlayer) {
+        playerSelect.value = duplicatePlayer.id;
+        state.selectedPlayer = duplicatePlayer;
+        fillPlayerForm(duplicatePlayer);
+        alert('PROFILO GIÀ PRESENTE.');
+        return;
+      }
+
+      const newPlayer = {
+        id: `player-${Date.now()}`,
+        firstName,
+        lastName,
+        number
+      };
+
+      state.players.push(newPlayer);
+      renderPlayers();
+      playerSelect.value = newPlayer.id;
+      state.selectedPlayer = newPlayer;
+    }
+
+    async function renderFinalCard() {
+      if (!state.selectedTemplate || !state.selectedPlayer || !state.photoDataUrl) return;
+
+      const [photoImage, templateImage] = await Promise.all([
+        loadImage(state.photoDataUrl),
+        loadImage(state.selectedTemplate.image)
+      ]);
+
+      ctx.clearRect(0, 0, renderCanvas.width, renderCanvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, renderCanvas.width, renderCanvas.height);
+
+      const fit = fitImageCover(photoImage, renderCanvas.width, renderCanvas.height);
+      ctx.drawImage(photoImage, fit.x, fit.y, fit.drawWidth, fit.drawHeight);
+      ctx.drawImage(templateImage, 0, 0, renderCanvas.width, renderCanvas.height);
+
+      const dominantColor = state.selectedTemplate.dominantColor || '#F97316';
+      const firstName = state.selectedPlayer.firstName || '';
+      const lastName = state.selectedPlayer.lastName || '';
+      const number = state.selectedPlayer.number || '';
+      const numberMarginLeft = 80;
+      const rightTextMargin = 60;
+
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'left';
+      ctx.font = '180px "Fugaz One", sans-serif';
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(0,0,0,0.42)';
+      ctx.strokeText(number, numberMarginLeft + 2, 90);
+      ctx.fillStyle = dominantColor;
+      ctx.fillText(number, numberMarginLeft, 90);
+
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'alphabetic';
+
+      ctx.fillStyle = dominantColor;
+      ctx.font = '68px "Fugaz One", sans-serif';
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(0,0,0,0.42)';
+      ctx.strokeText(firstName, renderCanvas.width - rightTextMargin + 2, renderCanvas.height - 160);
+      ctx.fillText(firstName, renderCanvas.width - rightTextMargin, renderCanvas.height - 160);
+
+      ctx.fillStyle = '#000000';
+      ctx.font = '108px "Fugaz One", sans-serif';
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(0,0,0,0.42)';
+      ctx.strokeText(lastName, renderCanvas.width - rightTextMargin + 2, renderCanvas.height - 60);
+      ctx.fillText(lastName, renderCanvas.width - rightTextMargin, renderCanvas.height - 60);
+
+      state.finalCardDataUrl = renderCanvas.toDataURL('image/png');
+      finalPreviewFrame.innerHTML = `<img src="${state.finalCardDataUrl}" alt="FIGURINA FINALE">`;
+    }
+
+    async function getCardFile() {
+      if (!state.finalCardDataUrl) return null;
+      const response = await fetch(state.finalCardDataUrl);
+      const blob = await response.blob();
+      return new File(
+        [blob],
+        `${(state.selectedPlayer?.firstName || 'figurina').toLowerCase()}-${(state.selectedPlayer?.lastName || 'player').toLowerCase()}.png`,
+        { type: 'image/png' }
+      );
+    }
+
+    async function downloadCard() {
+      const file = await getCardFile();
+      if (!file) return;
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(file);
+      link.download = file.name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    }
+
+    async function saveCard() {
+      const file = await getCardFile();
+      if (!file) return;
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'SALVA FIGURINA',
+          text: 'Salva la figurina nel rullino o nei file.',
+          files: [file]
+        });
+        return;
+      }
+
+      await downloadCard();
+    }
+
+    async function shareCard() {
+      const file = await getCardFile();
+      if (!file) return;
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'FIGURINA',
+          text: 'Condividi o salva la figurina.',
+          files: [file]
+        });
+      } else {
+        await downloadCard();
+      }
+    }
+
+    document.getElementById('goToPlayer').addEventListener('click', () => showScreen('player'));
+
+    document.getElementById('goToPhoto').addEventListener('click', () => {
+      const firstName = firstNameInput.value.trim().toUpperCase();
+      const lastName = lastNameInput.value.trim().toUpperCase();
+      const number = numberInput.value.trim().toUpperCase();
+      if (!firstName || !lastName || !number) {
+        alert('INSERISCI NOME, COGNOME E NUMERO.');
+        return;
+      }
+      state.selectedPlayer = { firstName, lastName, number };
+      showScreen('photo');
+    });
+
+    document.getElementById('goToPreview').addEventListener('click', async () => {
+      try {
+        await renderFinalCard();
+        showScreen('preview');
+      } catch (error) {
+        console.error(error);
+        alert('IMPOSSIBILE GENERARE LA FIGURINA. CONTROLLA TEMPLATE E FOTO.');
+      }
+    });
+
+    document.getElementById('savePlayer').addEventListener('click', savePlayerProfile);
+
+    playerSelect.addEventListener('change', (event) => {
+      const player = state.players.find((item) => item.id === event.target.value);
+      if (!player) return;
+      state.selectedPlayer = player;
+      fillPlayerForm(player);
+    });
+
+    [firstNameInput, lastNameInput, numberInput].forEach((input) => {
+      input.addEventListener('input', () => {
+        input.value = input.value.toUpperCase();
+      });
+    });
+
+    normalizeTap(document.getElementById('cameraButton'), () => triggerFileInput(cameraInput));
+    normalizeTap(document.getElementById('galleryButton'), () => triggerFileInput(galleryInput));
+    normalizeTap(document.getElementById('fileButton'), () => triggerFileInput(fileInput));
+
+    cameraInput.addEventListener('change', (event) => handlePhotoSelection(event.target.files[0]));
+    galleryInput.addEventListener('change', (event) => handlePhotoSelection(event.target.files[0]));
+    fileInput.addEventListener('change', (event) => handlePhotoSelection(event.target.files[0]));
+
+    document.querySelectorAll('[data-back]').forEach((button) => {
+      button.addEventListener('click', () => showScreen(button.dataset.back));
+    });
+
+    document.getElementById('saveToFiles').addEventListener('click', saveCard);
+    document.getElementById('shareCard').addEventListener('click', shareCard);
+
+    Promise.all([loadTemplates(), loadPlayers()]).catch((error) => {
+      console.error(error);
+      alert('ERRORE NEL CARICAMENTO DEI FILE JSON.');
+    });
+  </script>
+</body>
+</html>
