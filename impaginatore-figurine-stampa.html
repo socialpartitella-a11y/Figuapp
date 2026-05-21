@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impaginatore Figurine Stampa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --surface: #fcfbf8;
+      --surface-2: #f7f4ee;
+      --panel: #ffffff;
+      --text: #221f1a;
+      --muted: #6d675d;
+      --line: rgba(34,31,26,0.12);
+      --line-strong: rgba(34,31,26,0.22);
+      --accent: #0c6b63;
+      --shadow: 0 12px 40px rgba(37, 27, 15, 0.10);
+      --radius: 18px;
+      --page-w-mm: 210;
+      --page-h-mm: 297;
+      --card-w-mm: 54;
+      --card-h-mm: 76;
+      --margin-mm: 10;
+      --gap-mm: 6;
+      --cut-color: rgba(0,0,0,0.42);
+      --cut-length-mm: 5;
+      --cut-offset-mm: 2.2;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, #f8f5ef 0%, #efe8dc 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: rgba(252, 251, 248, 0.88);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--line);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0c6b63, #12463f);
+      display: grid;
+      place-items: center;
+      color: white;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+      flex: 0 0 auto;
+    }
+
+    .brand-mark svg { width: 26px; height: 26px; }
+
+    .brand-text h1 {
+      font-size: 1.12rem;
+      line-height: 1.1;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-text p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid var(--line);
+      box-shadow: 0 6px 18px rgba(52, 40, 25, 0.05);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font: inherit;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(12,107,99,0.5);
+      box-shadow: 0 0 0 4px rgba(12,107,99,0.08);
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      margin-top: 14px;
+    }
+
+    .toggle label {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .toggle input { width: 18px; height: 18px; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(12,107,99,0.24);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .hint-list {
+      margin: 14px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      display: grid;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .main {
+      padding: 28px;
+      overflow: auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .topbar p {
+      margin: 4px 0 0;
+      color: var(--muted);
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .workspace {
+      background: rgba(255,255,255,0.44);
+      border: 1px solid rgba(34,31,26,0.08);
+      border-radius: 28px;
+      padding: 26px;
+      box-shadow: var(--shadow);
+    }
+
+    .page-shell {
+      overflow: auto;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(247,244,238,0.75));
+      border: 1px solid var(--line);
+      padding: 24px;
+    }
+
+    .print-page {
+      width: calc(var(--page-w-mm) * 1mm);
+      min-height: calc(var(--page-h-mm) * 1mm);
+      background: #fff;
+      margin: 0 auto;
+      position: relative;
+      box-shadow: 0 18px 60px rgba(26,20,12,0.14);
+      padding: calc(var(--margin-mm) * 1mm);
+    }
+
+    .sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(calc(var(--card-w-mm) * 1mm), max-content));
+      gap: calc(var(--gap-mm) * 1mm);
+      justify-content: start;
+      align-content: start;
+    }
+
+    .print-card-wrap {
+      width: calc(var(--card-w-mm) * 1mm);
+      height: calc(var(--card-h-mm) * 1mm);
+      position: relative;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .cut-mark {
+      position: absolute;
+      background: var(--cut-color);
+      pointer-events: none;
+      display: none;
+    }
+
+    .show-cuts .cut-mark { display: block; }
+
+    .cut-h {
+      width: calc(var(--cut-length-mm) * 1mm);
+      height: 0.22mm;
+    }
+
+    .cut-v {
+      width: 0.22mm;
+      height: calc(var(--cut-length-mm) * 1mm);
+    }
+
+    .cut-top-left-h { left: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); top: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-top-left-v { left: calc(var(--cut-offset-mm) * -1mm); top: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+    .cut-top-right-h { right: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); top: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-top-right-v { right: calc(var(--cut-offset-mm) * -1mm); top: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+    .cut-bottom-left-h { left: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); bottom: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-bottom-left-v { left: calc(var(--cut-offset-mm) * -1mm); bottom: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+    .cut-bottom-right-h { right: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); bottom: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-bottom-right-v { right: calc(var(--cut-offset-mm) * -1mm); bottom: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+
+    .print-card {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      border: 0;
+      background: transparent;
+      isolation: isolate;
+    }
+
+    .card-art {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #d8ece8 0%, #f0ede7 45%, #d9cbb7 100%);
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .card-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .card-art.has-image img { display: block; }
+
+    .card-placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 10mm;
+      color: rgba(34,31,26,0.45);
+      text-align: center;
+      font-weight: 700;
+      font-size: 4.2mm;
+      letter-spacing: -0.03em;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.85), transparent 30%),
+        radial-gradient(circle at 80% 0%, rgba(12,107,99,0.14), transparent 25%),
+        linear-gradient(145deg, rgba(255,255,255,0.4), rgba(0,0,0,0));
+    }
+
+    .card-art.has-image .card-placeholder { display: none; }
+
+    .empty-state {
+      border: 1px dashed var(--line-strong);
+      border-radius: 20px;
+      padding: 34px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,0.56);
+    }
+
+    .hidden-input { display: none; }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .main { padding: 18px; }
+      .workspace, .page-shell { padding: 14px; }
+      .print-page { transform-origin: top center; }
+    }
+
+    @media print {
+      body { background: #fff; }
+
+      .sidebar,
+      .topbar,
+      .footer-note,
+      .workspace {
+        display: none !important;
+      }
+
+      .app,
+      .main,
+      .page-shell {
+        display: block;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .print-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none">
+            <rect x="8" y="10" width="32" height="28" rx="8" stroke="currentColor" stroke-width="3"></rect>
+            <path d="M16 18H32M16 24H26M16 30H23" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Impaginatore Figurine</h1>
+          <p>Modulo stampa A4 con segni di taglio sottili.</p>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2>Immagini</h2>
+        <p>Carica PNG o JPG delle figurine già esportate, oppure usa i dati demo per impostare il foglio stampa.</p>
+        <div class="actions">
+          <button class="btn-primary" id="loadImagesBtn">Carica immagini</button>
+          <button class="btn-secondary" id="loadDemoBtn">Usa demo</button>
+        </div>
+        <input class="hidden-input" id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+      </section>
+
+      <section class="card controls">
+        <div>
+          <h2>Formato foglio</h2>
+          <p>Regola misure reali in millimetri per A4 e per la singola figurina.</p>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="pageWidth">Larghezza foglio</label>
+            <input id="pageWidth" type="number" min="100" max="400" step="1" value="210">
+          </div>
+          <div class="field">
+            <label for="pageHeight">Altezza foglio</label>
+            <input id="pageHeight" type="number" min="100" max="500" step="1" value="297">
+          </div>
+          <div class="field">
+            <label for="cardWidth">Larghezza figurina</label>
+            <input id="cardWidth" type="number" min="30" max="120" step="0.5" value="54">
+          </div>
+          <div class="field">
+            <label for="cardHeight">Altezza figurina</label>
+            <input id="cardHeight" type="number" min="40" max="160" step="0.5" value="76">
+          </div>
+          <div class="field">
+            <label for="margin">Margine pagina</label>
+            <input id="margin" type="number" min="0" max="40" step="0.5" value="10">
+          </div>
+          <div class="field">
+            <label for="gap">Spazio tra figurine</label>
+            <input id="gap" type="number" min="0" max="20" step="0.5" value="6">
+          </div>
+          <div class="field">
+            <label for="cutLength">Lunghezza segni</label>
+            <input id="cutLength" type="number" min="2" max="12" step="0.2" value="5">
+          </div>
+          <div class="field">
+            <label for="cutOffset">Distanza segni</label>
+            <input id="cutOffset" type="number" min="0.5" max="10" step="0.1" value="2.2">
+          </div>
+          <div class="field full">
+            <label for="sheetTitle">Titolo foglio</label>
+            <input id="sheetTitle" type="text" value="Foglio stampa figurine">
+          </div>
+        </div>
+
+        <div class="toggle">
+          <label for="showCuts">Mostra linee guida di taglio</label>
+          <input id="showCuts" type="checkbox" checked>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="printBtn">Stampa / PDF</button>
+          <button class="btn-secondary" id="clearBtn">Svuota foglio</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Consigli stampa</h2>
+        <p>Le linee sottili restano fuori dall’area grafica della figurina, così il taglio è più pulito.</p>
+        <ul class="hint-list">
+          <li>Usa immagini già rifinite con lo stesso rapporto della figurina.</li>
+          <li>Per stampa domestica, prova cartoncino tra 200 e 300 g.</li>
+          <li>Esporta in PDF dal browser per mantenere misure e allineamento.</li>
+        </ul>
+      </section>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2 id="sheetTitleView">Foglio stampa figurine</h2>
+          <p id="sheetStats">0 figurine caricate.</p>
+        </div>
+        <div class="badge-row">
+          <span class="badge" id="layoutBadge">0 colonne × 0 righe</span>
+          <span class="badge" id="sizeBadge">54 × 76 mm</span>
+          <span class="badge">A4 pronto per stampa</span>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <div class="page-shell">
+          <div class="print-page show-cuts" id="printPage">
+            <div class="sheet-grid" id="sheetGrid"></div>
+          </div>
+        </div>
+        <p class="footer-note">Il layout è costruito per impaginazione reale su foglio. Le linee guida di taglio vengono posizionate all’esterno di ogni figurina e non interferiscono con il bordo grafico.</p>
+      </div>
+    </main>
+  </div>
+
+  <template id="cardTemplate">
+    <article class="print-card-wrap">
+      <span class="cut-mark cut-h cut-top-left-h"></span>
+      <span class="cut-mark cut-v cut-top-left-v"></span>
+      <span class="cut-mark cut-h cut-top-right-h"></span>
+      <span class="cut-mark cut-v cut-top-right-v"></span>
+      <span class="cut-mark cut-h cut-bottom-left-h"></span>
+      <span class="cut-mark cut-v cut-bottom-left-v"></span>
+      <span class="cut-mark cut-h cut-bottom-right-h"></span>
+      <span class="cut-mark cut-v cut-bottom-right-v"></span>
+      <div class="print-card">
+        <div class="card-art">
+          <img alt="Figurina" loading="lazy" decoding="async">
+          <div class="card-placeholder">Trascina qui o carica la figurina pronta</div>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const loadImagesBtn = document.getElementById('loadImagesBtn');
+    const loadDemoBtn = document.getElementById('loadDemoBtn');
+    const printBtn = document.getElementById('printBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const sheetGrid = document.getElementById('sheetGrid');
+    const printPage = document.getElementById('printPage');
+    const template = document.getElementById('cardTemplate');
+    const sheetStats = document.getElementById('sheetStats');
+    const layoutBadge = document.getElementById('layoutBadge');
+    const sizeBadge = document.getElementById('sizeBadge');
+    const sheetTitleView = document.getElementById('sheetTitleView');
+
+    const inputs = {
+      pageWidth: document.getElementById('pageWidth'),
+      pageHeight: document.getElementById('pageHeight'),
+      cardWidth: document.getElementById('cardWidth'),
+      cardHeight: document.getElementById('cardHeight'),
+      margin: document.getElementById('margin'),
+      gap: document.getElementById('gap'),
+      cutLength: document.getElementById('cutLength'),
+      cutOffset: document.getElementById('cutOffset'),
+      showCuts: document.getElementById('showCuts'),
+      sheetTitle: document.getElementById('sheetTitle')
+    };
+
+    let figures = [];
+
+    const demoFigures = [
+      { bg: 'linear-gradient(145deg, #d7ece7, #f6efe2)' },
+      { bg: 'linear-gradient(145deg, #ece4d7, #f7f4ee)' },
+      { bg: 'linear-gradient(145deg, #d8e4ef, #f4efe7)' },
+      { bg: 'linear-gradient(145deg, #e6ead7, #f6f1e6)' },
+      { bg: 'linear-gradient(145deg, #ead7e2, #f7efe9)' },
+      { bg: 'linear-gradient(145deg, #dde8ef, #f6efe4)' }
+    ];
+
+    function updateVars() {
+      const pageWidth = Number(inputs.pageWidth.value) || 210;
+      const pageHeight = Number(inputs.pageHeight.value) || 297;
+      const cardWidth = Number(inputs.cardWidth.value) || 54;
+      const cardHeight = Number(inputs.cardHeight.value) || 76;
+      const margin = Number(inputs.margin.value) || 10;
+      const gap = Number(inputs.gap.value) || 6;
+      const cutLength = Number(inputs.cutLength.value) || 5;
+      const cutOffset = Number(inputs.cutOffset.value) || 2.2;
+
+      document.documentElement.style.setProperty('--page-w-mm', pageWidth);
+      document.documentElement.style.setProperty('--page-h-mm', pageHeight);
+      document.documentElement.style.setProperty('--card-w-mm', cardWidth);
+      document.documentElement.style.setProperty('--card-h-mm', cardHeight);
+      document.documentElement.style.setProperty('--margin-mm', margin);
+      document.documentElement.style.setProperty('--gap-mm', gap);
+      document.documentElement.style.setProperty('--cut-length-mm', cutLength);
+      document.documentElement.style.setProperty('--cut-offset-mm', cutOffset);
+
+      sizeBadge.textContent = `${cardWidth} × ${cardHeight} mm`;
+      sheetTitleView.textContent = inputs.sheetTitle.value.trim() || 'Foglio stampa figurine';
+      printPage.classList.toggle('show-cuts', inputs.showCuts.checked);
+      updateLayoutStats();
+    }
+
+    function updateLayoutStats() {
+      const pageWidth = Number(inputs.pageWidth.value) || 210;
+      const pageHeight = Number(inputs.pageHeight.value) || 297;
+      const cardWidth = Number(inputs.cardWidth.value) || 54;
+      const cardHeight = Number(inputs.cardHeight.value) || 76;
+      const margin = Number(inputs.margin.value) || 10;
+      const gap = Number(inputs.gap.value) || 6;
+
+      const usableWidth = Math.max(0, pageWidth - margin * 2 + gap);
+      const usableHeight = Math.max(0, pageHeight - margin * 2 + gap);
+      const cols = Math.max(1, Math.floor(usableWidth / (cardWidth + gap)));
+      const rows = Math.max(1, Math.floor(usableHeight / (cardHeight + gap)));
+      layoutBadge.textContent = `${cols} colonne × ${rows} righe`;
+      sheetStats.textContent = `${figures.length} immagini caricate. Capacità stimata: ${cols * rows} per pagina.`;
+    }
+
+    function renderFigures() {
+      sheetGrid.innerHTML = '';
+
+      if (!figures.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = '<strong>Nessuna immagine caricata.</strong><br>Usa il pulsante “Carica immagini” oppure “Usa demo” per vedere subito il modulo impaginazione stampa.';
+        sheetGrid.appendChild(empty);
+        updateLayoutStats();
+        return;
+      }
+
+      figures.forEach((figure, index) => {
+        const node = template.content.firstElementChild.cloneNode(true);
+        const art = node.querySelector('.card-art');
+        const img = node.querySelector('img');
+
+        if (figure.src) {
+          img.src = figure.src;
+          art.classList.add('has-image');
+        } else if (figure.bg) {
+          art.style.background = figure.bg;
+        }
+
+        img.alt = figure.name ? `Figurina di ${figure.name}` : `Figurina ${index + 1}`;
+        sheetGrid.appendChild(node);
+      });
+
+      updateLayoutStats();
+    }
+
+    loadImagesBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (event) => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      Promise.all(files.map((file) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ src: reader.result });
+        reader.readAsDataURL(file);
+      }))).then((items) => {
+        figures = items;
+        renderFigures();
+      });
+    });
+
+    loadDemoBtn.addEventListener('click', () => {
+      figures = demoFigures.map(item => ({ ...item }));
+      renderFigures();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      figures = [];
+      fileInput.value = '';
+      renderFigures();
+    });
+
+    printBtn.addEventListener('click', () => window.print());
+
+    Object.values(inputs).forEach((input) => {
+      const eventName = input.type === 'checkbox' ? 'change' : 'input';
+      input.addEventListener(eventName, updateVars);
+    });
+
+    updateVars();
+    renderFigures();
+  </script>
+</body>
+</html>
