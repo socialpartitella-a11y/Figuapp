@@ -164,7 +164,7 @@
     }
 
     async function loadPlayers() {
-      const response = await fetch('./players.json');
+      const response = await fetch(`./players.json?v=${Date.now()}`);
       state.players = await response.json();
       renderPlayers();
     }
@@ -216,9 +216,39 @@
     }
 
     function fillPlayerForm(player) {
-      firstNameInput.value = player.firstName || '';
-      lastNameInput.value = player.lastName || '';
-      numberInput.value = player.number || '';
+      firstNameInput.value = (player.firstName || '').toUpperCase();
+      lastNameInput.value = (player.lastName || '').toUpperCase();
+      numberInput.value = (player.number || '').toUpperCase();
+    }
+
+    function syncSelectedPlayerFromForm() {
+      const firstName = firstNameInput.value.trim().toUpperCase();
+      const lastName = lastNameInput.value.trim().toUpperCase();
+      const number = numberInput.value.trim().toUpperCase();
+
+      if (!firstName || !lastName || !number) return null;
+
+      const selectedId = playerSelect.value;
+      const matchedPlayer = selectedId
+        ? state.players.find((item) => item.id === selectedId)
+        : null;
+
+      if (matchedPlayer &&
+          (matchedPlayer.firstName || '').toUpperCase() === firstName &&
+          (matchedPlayer.lastName || '').toUpperCase() === lastName &&
+          String(matchedPlayer.number || '').toUpperCase() === number) {
+        state.selectedPlayer = matchedPlayer;
+        return matchedPlayer;
+      }
+
+      state.selectedPlayer = {
+        id: selectedId || `temp-${Date.now()}`,
+        firstName,
+        lastName,
+        number
+      };
+
+      return state.selectedPlayer;
     }
 
     function readFile(file) {
@@ -306,7 +336,8 @@
     }
 
     async function renderFinalCard() {
-      if (!state.selectedTemplate || !state.selectedPlayer || !state.photoDataUrl) return;
+      const currentPlayer = syncSelectedPlayerFromForm();
+      if (!state.selectedTemplate || !currentPlayer || !state.photoDataUrl) return;
 
       const [photoImage, templateImage] = await Promise.all([
         loadImage(state.photoDataUrl),
@@ -322,9 +353,9 @@
       ctx.drawImage(templateImage, 0, 0, renderCanvas.width, renderCanvas.height);
 
       const dominantColor = state.selectedTemplate.dominantColor || '#F97316';
-      const firstName = state.selectedPlayer.firstName || '';
-      const lastName = state.selectedPlayer.lastName || '';
-      const number = state.selectedPlayer.number || '';
+      const firstName = currentPlayer.firstName || '';
+      const lastName = currentPlayer.lastName || '';
+      const number = currentPlayer.number || '';
       const numberMarginLeft = 80;
       const rightTextMargin = 60;
 
@@ -413,14 +444,11 @@
     document.getElementById('goToPlayer').addEventListener('click', () => showScreen('player'));
 
     document.getElementById('goToPhoto').addEventListener('click', () => {
-      const firstName = firstNameInput.value.trim().toUpperCase();
-      const lastName = lastNameInput.value.trim().toUpperCase();
-      const number = numberInput.value.trim().toUpperCase();
-      if (!firstName || !lastName || !number) {
+      const syncedPlayer = syncSelectedPlayerFromForm();
+      if (!syncedPlayer) {
         alert('INSERISCI NOME, COGNOME E NUMERO.');
         return;
       }
-      state.selectedPlayer = { firstName, lastName, number };
       showScreen('photo');
     });
 
