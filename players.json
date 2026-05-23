@@ -93,13 +93,13 @@
     "id": "player-016",
     "firstName": "ROBERTA",
     "lastName": "ROMAGNUOLO",
-    "number": "11"
+    "number": "3"
   },
   {
     "id": "player-017",
     "firstName": "ROBERTA",
     "lastName": "MAGLIONE",
-    "number": "10"
+    "number": "14"
   },
   {
     "id": "player-018",
@@ -110,7 +110,7 @@
   {
     "id": "player-019",
     "firstName": "IRENE",
-    "lastName": "PROIETTI CESARINI",
+    "lastName": "PROIETTI xCESARINI",
     "number": "99"
   },
   {
@@ -160,5 +160,11 @@
     "firstName": "YLENIA",
     "lastName": "DI CLAVIO",
     "number": "99"
+  },
+  {
+    "id": "player-028",
+    "firstName": "ELIZABETH",
+    "lastName": "BALZANO",
+    "number": "18"
   }
 ]
