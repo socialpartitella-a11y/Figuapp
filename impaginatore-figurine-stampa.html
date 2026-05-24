@@ -710,7 +710,31 @@
       renderFigures();
     });
 
-    printBtn.addEventListener('click', () => window.print());
+    async function waitForImages() {
+  const images = Array.from(sheetGrid.querySelectorAll('img'))
+    .filter(img => img.getAttribute('src'));
+
+  await Promise.all(images.map((img) => {
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise((resolve) => {
+      const done = () => resolve();
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    });
+  }));
+}
+
+printBtn.addEventListener('click', async () => {
+  updateVars();
+  renderFigures();
+  await waitForImages();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.print();
+    });
+  });
+});
+
 
     Object.values(inputs).forEach((input) => {
       const eventName = input.type === 'checkbox' ? 'change' : 'input';
