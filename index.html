@@ -445,12 +445,14 @@
 
     document.getElementById('savePlayer').addEventListener('click', savePlayerProfile);
 
-    playerSelect.addEventListener('change', (event) => {
-      const player = state.players.find((item) => item.id === event.target.value);
-      if (!player) return;
-      state.selectedPlayer = player;
-      fillPlayerForm(player);
-    });
+playerSelect.addEventListener('change', (event) => {
+  const selectedId = String(event.target.value);
+  const player = state.players.find((item) => String(item.id) === selectedId);
+  if (!player) return;
+  state.selectedPlayer = player;
+  fillPlayerForm(player);
+});
+
 
     [firstNameInput, lastNameInput, numberInput].forEach((input) => {
       input.addEventListener('input', () => {
