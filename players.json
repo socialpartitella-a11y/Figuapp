@@ -1,146 +1,72 @@
 [
-  {
-    "id": "player-001",
-    "firstName": "ALESSIO",
-    "lastName": "ZERELLA",
-    "number": "3"
-  },
-  {
-    "id": "player-002",
-    "firstName": "IACOPO",
-    "lastName": "BAFFIGI",
-    "number": "10"
-  },
-  {
-    "id": "player-003",
-    "firstName": "MATTEO",
-    "lastName": "MAZZON",
-    "number": "6"
-  },
-  {
-    "id": "player-004",
-    "firstName": "GIONNI",
-    "lastName": "DI FIORE",
-    "number": "10"
-  },
-  {
-    "id": "player-005",
-    "firstName": "MATTIA",
-    "lastName": "CAPUCCIO",
-    "number": "0"
-  },
-  {
-    "id": "player-006",
-    "firstName": "MARCO",
-    "lastName": "ARDONE",
-    "number": "3"
-  },
-  {
-    "id": "player-007",
-    "firstName": "ALESSIO",
-    "lastName": "SECOSAN",
-    "number": "7"
-  },
-  {
-    "id": "player-008",
-    "firstName": "MATTIA",
-    "lastName": "RAPACCINI",
-    "number": "17"
-  },
-  {
-    "id": "player-009",
-    "firstName": "SIMONE",
-    "lastName": "GABRIELLI",
-    "number": "8"
-  },
-  {
-    "id": "player-010",
-    "firstName": "IVAN",
-    "lastName": "ROSTIROLLA",
-    "number": "11"
-  },
-  {
-    "id": "player-011",
-    "firstName": "EMANUELE",
-    "lastName": "CECE",
-    "number": "0"
-  },
-  {
-    "id": "player-012",
-    "firstName": "MATHIAS",
-    "lastName": "DE BLASIS",
-    "number": "0"
-  },
-  {
-    "id": "player-013",
-    "firstName": "FEDERICO",
-    "lastName": "ARDIA",
-    "number": "8"
-  },
-  {
-    "id": "player-014",
-    "firstName": "DOMENICO",
-    "lastName": "PONSILLO",
-    "number": "7"
-  },
-  {
-    "id": "player-015",
-    "firstName": "ANDREA",
-    "lastName": "LORENZETTO",
-    "number": "4"
-  },
-  {
-    "id": "player-016",
-    "firstName": "CATALIN",
-    "lastName": "TUVENE",
-    "number": "4"
-  },
-  {
-    "id": "player-017",
-    "firstName": "MATTEO",
-    "lastName": "CRESCIENZO",
-    "number": "0"
-  },
-  {
-    "id": "player-018",
-    "firstName": "MAURO",
-    "lastName": "CERQUA",
-    "number": "11"
-  },
-  {
-    "id": "player-019",
-    "firstName": "SAMUEL",
-    "lastName": "CAPONI",
-    "number": "10"
-  },
-  {
-    "id": "player-020",
-    "firstName": "DAVIDE",
-    "lastName": "PALLUZZI",
-    "number": "4"
-  },
-  {
-    "id": "player-021",
-    "firstName": "GIORGIA",
-    "lastName": "SALESI",
-    "number": "5"
-  },
-  {
-    "id": "player-022",
-    "firstName": "GIORDANO",
-    "lastName": "PALMACCI",
-    "number": "10"
-  },
-  {
-    "id": "player-023",
-    "firstName": "LUCA",
-    "lastName": "SCOGNAMIGLIO",
-    "number": "0"
-  },
-  {
-    "id": "player-024",
-    "firstName": "PIERPAOLO A.",
-    "lastName": "RACCIATTI",
-    "number": "8"
-  }
+  { "id": 1, "firstName": "Cristian", "lastName": "Sabellico", "number": "" },
+  { "id": 2, "firstName": "Anna Maria", "lastName": "Quinzi", "number": "" },
+  { "id": 3, "firstName": "Carlotta", "lastName": "Di Maio", "number": "" },
+  { "id": 4, "firstName": "Francesco", "lastName": "Romani", "number": "" },
+  { "id": 5, "firstName": "Manuel", "lastName": "Colaceci", "number": "" },
+  { "id": 6, "firstName": "Regina", "lastName": "Pesce", "number": "" },
+  { "id": 7, "firstName": "Sara", "lastName": "Di Maio", "number": "" },
+  { "id": 8, "firstName": "Claudio", "lastName": "Romani", "number": "" },
+
+  { "id": 9, "firstName": "Viviana", "lastName": "Gallo", "number": "" },
+  { "id": 10, "firstName": "Greta", "lastName": "Di Fraia", "number": "" },
+  { "id": 11, "firstName": "Maryam", "lastName": "Contenti", "number": "" },
+  { "id": 12, "firstName": "Giuseppe", "lastName": "Castaldi", "number": "" },
+  { "id": 13, "firstName": "Anna Maria", "lastName": "Gallo", "number": "" },
+  { "id": 14, "firstName": "Asya", "lastName": "Di Fraia", "number": "" },
+  { "id": 15, "firstName": "Linda", "lastName": "Lepole", "number": "" },
+  { "id": 16, "firstName": "Monia", "lastName": "Castaldi", "number": "" },
+
+  { "id": 17, "firstName": "Denis", "lastName": "Isopo", "number": "" },
+  { "id": 18, "firstName": "Francesco", "lastName": "Muscolino", "number": "" },
+  { "id": 19, "firstName": "Umberto", "lastName": "Schena", "number": "" },
+  { "id": 20, "firstName": "Letizia", "lastName": "Zarola", "number": "" },
+  { "id": 21, "firstName": "Norma", "lastName": "Passeri", "number": "" },
+  { "id": 22, "firstName": "Simone", "lastName": "Berardi", "number": "" },
+  { "id": 23, "firstName": "Francesco", "lastName": "", "number": "" },
+  { "id": 24, "firstName": "Federico", "lastName": "Sechel", "number": "" },
+  { "id": 25, "firstName": "Landi", "lastName": "Mattei", "number": "" },
+
+  { "id": 26, "firstName": "Massimo", "lastName": "Fiore", "number": "" },
+  { "id": 27, "firstName": "Federico", "lastName": "Picca", "number": "" },
+  { "id": 28, "firstName": "Raffaella", "lastName": "Orbisaglia", "number": "" },
+  { "id": 29, "firstName": "Francesco", "lastName": "Martino", "number": "" },
+  { "id": 30, "firstName": "Silvia", "lastName": "Macale", "number": "" },
+  { "id": 31, "firstName": "Susanna", "lastName": "Gobbo", "number": "" },
+  { "id": 32, "firstName": "Marco", "lastName": "Guerriero", "number": "" },
+  { "id": 33, "firstName": "Armando", "lastName": "Toti", "number": "" },
+  { "id": 34, "firstName": "Zelio", "lastName": "Marzaro", "number": "" },
+  { "id": 35, "firstName": "Martina", "lastName": "Rubeca", "number": "" },
+
+  { "id": 36, "firstName": "Alessandro", "lastName": "Andreini", "number": "" },
+  { "id": 37, "firstName": "Fabrizio", "lastName": "Cuplilaro", "number": "" },
+  { "id": 38, "firstName": "Alessandro", "lastName": "Guida", "number": "" },
+  { "id": 39, "firstName": "Lorenzo", "lastName": "Villani", "number": "" },
+  { "id": 40, "firstName": "Jeferson", "lastName": "Ronloni", "number": "" },
+  { "id": 41, "firstName": "Fabrizio", "lastName": "Saltini", "number": "" },
+  { "id": 42, "firstName": "Marco", "lastName": "Tagliaboschi", "number": "" },
+  { "id": 43, "firstName": "Francesco", "lastName": "Ceci", "number": "" },
+  { "id": 44, "firstName": "Vincseso", "lastName": "Tassone", "number": "" },
+  { "id": 45, "firstName": "Nicole", "lastName": "Cordi", "number": "" },
+
+  { "id": 46, "firstName": "Sofia Iolanda", "lastName": "Ippoum", "number": "" },
+  { "id": 47, "firstName": "Lorenzo", "lastName": "Franze", "number": "" },
+  { "id": 48, "firstName": "Alberto", "lastName": "Attenni", "number": "" },
+  { "id": 49, "firstName": "Giulia", "lastName": "Cavaterra", "number": "" },
+  { "id": 50, "firstName": "Nicole", "lastName": "Ippoum", "number": "" },
+  { "id": 51, "firstName": "Greta", "lastName": "Gravina", "number": "" },
+  { "id": 52, "firstName": "Giorgia", "lastName": "Gravina", "number": "" },
+  { "id": 53, "firstName": "Ilenia Marcella", "lastName": "Rigon", "number": "" },
+  { "id": 54, "firstName": "Giulia", "lastName": "Monroni", "number": "" },
+  { "id": 55, "firstName": "Tiziano", "lastName": "D'Orso", "number": "" },
+
+  { "id": 56, "firstName": "Sebastiano", "lastName": "Garzia", "number": "" },
+  { "id": 57, "firstName": "Paolo", "lastName": "Del Savio", "number": "" },
+  { "id": 58, "firstName": "Cristina", "lastName": "Di Ianne", "number": "" },
+  { "id": 59, "firstName": "Giulia", "lastName": "Galdi", "number": "" },
+  { "id": 60, "firstName": "Andrea", "lastName": "Del Salvo", "number": "" },
+  { "id": 61, "firstName": "Emanuele", "lastName": "Del Savio", "number": "" },
+  { "id": 62, "firstName": "Eleonora", "lastName": "Carlucci", "number": "" },
+  { "id": 63, "firstName": "Eleonora", "lastName": "Emmanuele", "number": "" },
+  { "id": 64, "firstName": "Anastasia", "lastName": "Morganti", "number": "" }
 ]
