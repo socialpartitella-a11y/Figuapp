@@ -419,17 +419,19 @@
 
     document.getElementById('goToPlayer').addEventListener('click', () => showScreen('player'));
 
-    document.getElementById('goToPhoto').addEventListener('click', () => {
+     document.getElementById('goToPhoto').addEventListener('click', () => {
       const firstName = firstNameInput.value.trim().toUpperCase();
       const lastName = lastNameInput.value.trim().toUpperCase();
       const number = numberInput.value.trim().toUpperCase();
-      if (!firstName || !lastName || !number) {
-        alert('INSERISCI NOME, COGNOME E NUMERO.');
-        return;
-      }
-      state.selectedPlayer = { firstName, lastName, number };
+
+      state.selectedPlayer = {
+        firstName,
+        lastName,
+        number
+      };
       showScreen('photo');
     });
+
 
     document.getElementById('goToPreview').addEventListener('click', async () => {
       try {
