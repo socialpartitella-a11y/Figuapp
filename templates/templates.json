@@ -16,6 +16,12 @@
     "name": "QUEENS",
     "image": "./templates/Template figurina queens.png",
     "dominantColor": "#BA275E"
+  },
+  {
+    "id": "cangaroo",
+    "name": "CANGAROO",
+    "image": "./templates/Template figurina cangaroo.png",
+    "dominantColor": "#00A86B"
   }
 ]
 
