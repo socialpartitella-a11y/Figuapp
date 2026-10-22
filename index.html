@@ -272,45 +272,44 @@
       }, { passive: false });
     }
 
-   function savePlayerProfile() {
-  const firstName = firstNameInput.value.trim().toUpperCase();
-  const lastName = lastNameInput.value.trim().toUpperCase();
-  const number = numberInput.value.trim().toUpperCase();
-  const hasPlayerData = firstName || lastName || number;
+    function savePlayerProfile() {
+      const firstName = firstNameInput.value.trim().toUpperCase();
+      const lastName = lastNameInput.value.trim().toUpperCase();
+      const number = numberInput.value.trim().toUpperCase();
+      const hasPlayerData = firstName || lastName || number;
 
-  const duplicatePlayer = hasPlayerData ? state.players.find((player) =>
-    (player.firstName || '').toUpperCase() === firstName &&
-    (player.lastName || '').toUpperCase() === lastName &&
-    String(player.number || '').toUpperCase() === number
-  ) : null;
+      const duplicatePlayer = hasPlayerData ? state.players.find((player) =>
+        (player.firstName || '').toUpperCase() === firstName &&
+        (player.lastName || '').toUpperCase() === lastName &&
+        String(player.number || '').toUpperCase() === number
+      ) : null;
 
-  if (duplicatePlayer) {
-    playerSelect.value = duplicatePlayer.id;
-    state.selectedPlayer = duplicatePlayer;
-    fillPlayerForm(duplicatePlayer);
-    alert('PROFILO GIÀ PRESENTE.');
-    return;
-  }
+      if (duplicatePlayer) {
+        playerSelect.value = duplicatePlayer.id;
+        state.selectedPlayer = duplicatePlayer;
+        fillPlayerForm(duplicatePlayer);
+        alert('PROFILO GIÀ PRESENTE.');
+        return;
+      }
 
-  if (!hasPlayerData) {
-    state.selectedPlayer = null;
-    playerSelect.value = '';
-    return;
-  }
+      if (!hasPlayerData) {
+        state.selectedPlayer = null;
+        playerSelect.value = '';
+        return;
+      }
 
-  const newPlayer = {
-    id: `player-${Date.now()}`,
-    firstName,
-    lastName,
-    number
-  };
+      const newPlayer = {
+        id: `player-${Date.now()}`,
+        firstName,
+        lastName,
+        number
+      };
 
-  state.players.push(newPlayer);
-  renderPlayers();
-  playerSelect.value = newPlayer.id;
-  state.selectedPlayer = newPlayer;
-}
-
+      state.players.push(newPlayer);
+      renderPlayers();
+      playerSelect.value = newPlayer.id;
+      state.selectedPlayer = newPlayer;
+    }
 
     async function renderFinalCard() {
       if (!state.selectedTemplate || !state.selectedPlayer || !state.photoDataUrl) return;
@@ -328,7 +327,10 @@
       ctx.drawImage(photoImage, fit.x, fit.y, fit.drawWidth, fit.drawHeight);
       ctx.drawImage(templateImage, 0, 0, renderCanvas.width, renderCanvas.height);
 
+      // Integrazione del secondaryColor
       const dominantColor = state.selectedTemplate.dominantColor || '#F97316';
+      const secondaryColor = state.selectedTemplate.secondaryColor || '#000000';
+      
       const firstName = state.selectedPlayer.firstName || '';
       const lastName = state.selectedPlayer.lastName || '';
       const number = state.selectedPlayer.number || '';
@@ -354,7 +356,8 @@
       ctx.strokeText(firstName, renderCanvas.width - rightTextMargin + 2, renderCanvas.height - 160);
       ctx.fillText(firstName, renderCanvas.width - rightTextMargin, renderCanvas.height - 160);
 
-      ctx.fillStyle = '#000000';
+      // Utilizzo del secondaryColor per il cognome
+      ctx.fillStyle = secondaryColor;
       ctx.font = '108px "Fugaz One", sans-serif';
       ctx.lineWidth = 6;
       ctx.strokeStyle = 'rgba(0,0,0,0.42)';
@@ -419,7 +422,7 @@
 
     document.getElementById('goToPlayer').addEventListener('click', () => showScreen('player'));
 
-     document.getElementById('goToPhoto').addEventListener('click', () => {
+    document.getElementById('goToPhoto').addEventListener('click', () => {
       const firstName = firstNameInput.value.trim().toUpperCase();
       const lastName = lastNameInput.value.trim().toUpperCase();
       const number = numberInput.value.trim().toUpperCase();
@@ -431,7 +434,6 @@
       };
       showScreen('photo');
     });
-
 
     document.getElementById('goToPreview').addEventListener('click', async () => {
       try {
@@ -445,14 +447,13 @@
 
     document.getElementById('savePlayer').addEventListener('click', savePlayerProfile);
 
-playerSelect.addEventListener('change', (event) => {
-  const selectedId = String(event.target.value);
-  const player = state.players.find((item) => String(item.id) === selectedId);
-  if (!player) return;
-  state.selectedPlayer = player;
-  fillPlayerForm(player);
-});
-
+    playerSelect.addEventListener('change', (event) => {
+      const selectedId = String(event.target.value);
+      const player = state.players.find((item) => String(item.id) === selectedId);
+      if (!player) return;
+      state.selectedPlayer = player;
+      fillPlayerForm(player);
+    });
 
     [firstNameInput, lastNameInput, numberInput].forEach((input) => {
       input.addEventListener('input', () => {
