@@ -1,38 +1,37 @@
 [
-    {
+  {
     "id": "partitella-standard",
     "name": "PARTITELLA STANDARD",
     "image": "./templates/Template figurina standard.png",
-    "dominantColor": "#FF4A00"
-    "secondaryColor": "#000000",
+    "dominantColor": "#FF4A00",
+    "secondaryColor": "#000000"
   },
-    {
+  {
     "id": "partitella-punk",
     "name": "PARTITELLA PUNK",
     "image": "./templates/Template figurina punk.png",
-    "dominantColor": "#F86802"
-    "secondaryColor": "#FFFFFF",
+    "dominantColor": "#F86802",
+    "secondaryColor": "#FFFFFF"
   },
   {
     "id": "partitella",
     "name": "PARTITELLA",
     "image": "./templates/Template figurina partitella.png",
-    "dominantColor": "#FF4A00"
-    "secondaryColor": "#000000",
+    "dominantColor": "#FF4A00",
+    "secondaryColor": "#000000"
   },
   {
     "id": "queens",
     "name": "QUEENS",
     "image": "./templates/Template figurina queens.png",
-    "dominantColor": "#BA275E"
-    "secondaryColor": "#000000",
+    "dominantColor": "#BA275E",
+    "secondaryColor": "#000000"
   },
   {
     "id": "cangaroo",
     "name": "CANGAROO",
     "image": "./templates/Template figurina cangaroo.png",
-    "dominantColor": "#00A86B"
-    "secondaryColor": "#000000",
+    "dominantColor": "#00A86B",
+    "secondaryColor": "#000000"
   }
 ]
-
