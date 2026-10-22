@@ -1,14 +1,20 @@
 [
+    {
+    "id": "partitella-standard",
+    "name": "PARTITELLA STANDARD",
+    "image": "./templates/Template figurina standard.png",
+    "dominantColor": "#FF4A00"
+  },
+    {
+    "id": "partitella-punk",
+    "name": "PARTITELLA PUNK",
+    "image": "./templates/Template figurina punk.png",
+    "dominantColor": "#FF4A00"
+  },
   {
     "id": "partitella",
     "name": "PARTITELLA",
     "image": "./templates/Template figurina partitella.png",
-    "dominantColor": "#FF4A00"
-  },
-  {
-    "id": "partitella-standard",
-    "name": "PARTITELLA STANDARD",
-    "image": "./templates/Template figurina standard.png",
     "dominantColor": "#FF4A00"
   },
   {
