@@ -461,7 +461,6 @@
         box-shadow: none;
         page-break-after: always;
         break-after: page;
-        /* Rimuoviamo l'overflow nascosto in stampa per sicurezza */
         overflow: visible; 
       }
 
@@ -579,7 +578,6 @@
 
       <div class="workspace">
         <div class="page-shell" id="pageShell">
-          <!-- I fogli A4 verranno generati dinamicamente qui dentro -->
         </div>
         <p class="footer-note">Il layout è costruito per impaginazione reale su foglio. Le linee guida di taglio vengono posizionate all’esterno di ogni figurina e non interferiscono con il bordo grafico.</p>
       </div>
@@ -643,7 +641,7 @@
       { bg: 'linear-gradient(145deg, #f0e6d2, #e8d5bc)' },
       { bg: 'linear-gradient(145deg, #d2e8f0, #bce0e8)' },
       { bg: 'linear-gradient(145deg, #f0d2d2, #e8bcbc)' },
-      { bg: 'linear-gradient(145deg, #e2d2f0, #d0bce8)' } // 10 demo per testare la multi-pagina
+      { bg: 'linear-gradient(145deg, #e2d2f0, #d0bce8)' }
     ];
 
     function getGridDimensions() {
@@ -691,6 +689,54 @@
       sheetStats.textContent = `${figures.length} immagini caricate. Capienza foglio: ${perPage} figurine. Pagine stimate: ${Math.ceil(Math.max(1, figures.length) / perPage)}`;
     }
 
+    // Funzione di Center Crop basata sul rapporto d'aspetto della figurina
+    function processImageWithCenterCrop(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const cardW = Number(inputs.cardWidth.value) || 54;
+            const cardH = Number(inputs.cardHeight.value) || 76;
+            
+            // Fattore di scala ad alta definizione per la stampa (es. 10x pixel per mm)
+            const scale = 10;
+            const targetW = cardW * scale;
+            const targetH = cardH * scale;
+
+            canvas.width = targetW;
+            canvas.height = targetH;
+
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const targetRatio = targetW / targetH;
+
+            let sWidth = img.naturalWidth;
+            let sHeight = img.naturalHeight;
+            let sX = 0;
+            let sY = 0;
+
+            if (imgRatio > targetRatio) {
+              // Immagine più larga del target: ritaglia i lati (centrato)
+              sWidth = img.naturalHeight * targetRatio;
+              sX = (img.naturalWidth - sWidth) / 2;
+            } else {
+              // Immagine più alta del target: ritaglia sopra e sotto (centrato)
+              sHeight = img.naturalWidth / targetRatio;
+              sY = (img.naturalHeight - sHeight) / 2;
+            }
+
+            ctx.drawImage(img, sX, sY, sWidth, sHeight, 0, 0, targetW, targetH);
+            resolve({ src: canvas.toDataURL('image/jpeg', 0.92) });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     function renderFigures() {
       pageShell.innerHTML = '';
       const dims = getGridDimensions();
@@ -713,7 +759,6 @@
         return;
       }
 
-      // Suddivide le figurine in blocchi in base alla capienza della pagina (es. max 9 o 12 per pagina)
       for (let i = 0; i < figures.length; i += perPage) {
         const chunk = figures.slice(i, i + perPage);
         
@@ -748,18 +793,19 @@
 
     loadImagesBtn.addEventListener('click', () => fileInput.click());
 
-    fileInput.addEventListener('change', (event) => {
+    fileInput.addEventListener('change', async (event) => {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
 
-      Promise.all(files.map((file) => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ src: reader.result });
-        reader.readAsDataURL(file);
-      }))).then((items) => {
-        figures = items;
-        renderFigures();
-      });
+      // Applica il crop centrale a tutte le immagini caricate
+      const processedItems = [];
+      for (const file of files) {
+        const croppedItem = await processImageWithCenterCrop(file);
+        processedItems.push(croppedItem);
+      }
+
+      figures = processedItems;
+      renderFigures();
     });
 
     loadDemoBtn.addEventListener('click', () => {
