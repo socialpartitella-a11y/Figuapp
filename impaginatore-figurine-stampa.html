@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Impaginatore Figurine Stampa</title>
+  <title>Impaginatore Figurine Stampa v1.6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -84,12 +84,28 @@
 
     .brand-mark svg { width: 26px; height: 26px; }
 
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .brand-text h1 {
       font-size: 1.12rem;
       line-height: 1.1;
       margin: 0;
       font-weight: 800;
       letter-spacing: -0.03em;
+    }
+
+    .version-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(12,107,99,0.12);
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
     }
 
     .brand-text p {
@@ -277,7 +293,7 @@
     }
 
     .page-shell {
-      overflow-x: auto;
+      overflow: auto;
       border-radius: 22px;
       background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(247,244,238,0.75));
       border: 1px solid var(--line);
@@ -314,6 +330,7 @@
       gap: calc(var(--gap-mm) * 1mm);
       justify-content: center;
       align-content: start;
+      width: 100%;
     }
 
     .print-card-wrap {
@@ -424,8 +441,8 @@
     }
 
     @page {
-      size: A4 portrait;
-      margin: 0mm;
+      size: 210mm 297mm;
+      margin: 0;
     }
 
     @media (max-width: 1080px) {
@@ -433,14 +450,16 @@
       .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
       .main { padding: 18px; }
       .workspace, .page-shell { padding: 14px; }
+      
+      .print-page {
+        transform: scale(0.72);
+        transform-origin: top center;
+        margin-bottom: -80px;
+      }
     }
 
     @media print {
-      html, body {
-        width: 210mm;
-        height: 297mm;
-        background: #fff;
-      }
+      body { background: #fff; }
 
       .sidebar,
       .topbar,
@@ -468,13 +487,12 @@
       .print-page {
         width: 210mm !important;
         min-width: 210mm !important;
-        max-width: 210mm !important;
         height: 297mm !important;
         min-height: 297mm !important;
-        max-height: 297mm !important;
         margin: 0 !important;
         padding: calc(var(--margin-mm) * 1mm) !important;
         box-shadow: none !important;
+        transform: none !important;
         page-break-after: always;
         break-after: page;
         overflow: visible; 
@@ -498,7 +516,10 @@
           </svg>
         </div>
         <div class="brand-text">
-          <h1>Impaginatore Figurine</h1>
+          <div class="brand-title-row">
+            <h1>Impaginatore Figurine</h1>
+            <span class="version-tag">v1.6</span>
+          </div>
           <p>Modulo stampa A4 con segni di taglio sottili.</p>
         </div>
       </div>
@@ -669,202 +690,3 @@
       const gap = Number(inputs.gap.value) || 6;
 
       const usableWidth = pageWidth - (margin * 2);
-      const usableHeight = pageHeight - (margin * 2);
-      
-      const cols = Math.max(1, Math.floor((usableWidth + gap) / (cardWidth + gap)));
-      const rows = Math.max(1, Math.floor((usableHeight + gap) / (cardHeight + gap)));
-
-      return { pageWidth, pageHeight, cardWidth, cardHeight, margin, gap, cols, rows };
-    }
-
-    function updateVars() {
-      const dims = getGridDimensions();
-      const cutLength = Number(inputs.cutLength.value) || 5;
-      const cutOffset = Number(inputs.cutOffset.value) || 2.2;
-
-      document.documentElement.style.setProperty('--page-w-mm', dims.pageWidth);
-      document.documentElement.style.setProperty('--page-h-mm', dims.pageHeight);
-      document.documentElement.style.setProperty('--card-w-mm', dims.cardWidth);
-      document.documentElement.style.setProperty('--card-h-mm', dims.cardHeight);
-      document.documentElement.style.setProperty('--margin-mm', dims.margin);
-      document.documentElement.style.setProperty('--gap-mm', dims.gap);
-      document.documentElement.style.setProperty('--cut-length-mm', cutLength);
-      document.documentElement.style.setProperty('--cut-offset-mm', cutOffset);
-      document.documentElement.style.setProperty('--dynamic-cols', dims.cols);
-      document.documentElement.style.setProperty('--dynamic-rows', dims.rows);
-
-      sizeBadge.textContent = `${dims.cardWidth} × ${dims.cardHeight} mm`;
-      sheetTitleView.textContent = inputs.sheetTitle.value.trim() || 'Foglio stampa figurine';
-      
-      updateLayoutStats(dims);
-    }
-
-    function updateLayoutStats(dims) {
-      const perPage = dims.cols * dims.rows;
-      layoutBadge.textContent = `${dims.cols} colonne × ${dims.rows} righe`;
-      sheetStats.textContent = `${figures.length} immagini caricate. Capienza foglio: ${perPage} figurine. Pagine stimate: ${Math.ceil(Math.max(1, figures.length) / perPage)}`;
-    }
-
-    function processImageWithCenterCrop(file) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            const cardW = Number(inputs.cardWidth.value) || 54;
-            const cardH = Number(inputs.cardHeight.value) || 76;
-            
-            const scale = 10;
-            const targetW = cardW * scale;
-            const targetH = cardH * scale;
-
-            canvas.width = targetW;
-            canvas.height = targetH;
-
-            const imgRatio = img.naturalWidth / img.naturalHeight;
-            const targetRatio = targetW / targetH;
-
-            let sWidth = img.naturalWidth;
-            let sHeight = img.naturalHeight;
-            let sX = 0;
-            let sY = 0;
-
-            if (imgRatio > targetRatio) {
-              sWidth = img.naturalHeight * targetRatio;
-              sX = (img.naturalWidth - sWidth) / 2;
-            } else {
-              sHeight = img.naturalWidth / targetRatio;
-              sY = (img.naturalHeight - sHeight) / 2;
-            }
-
-            ctx.drawImage(img, sX, sY, sWidth, sHeight, 0, 0, targetW, targetH);
-            resolve({ src: canvas.toDataURL('image/jpeg', 0.92) });
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function renderFigures() {
-      pageShell.innerHTML = '';
-      const dims = getGridDimensions();
-      const perPage = dims.cols * dims.rows;
-      const showCuts = inputs.showCuts.checked;
-
-      if (!figures.length) {
-        const page = document.createElement('div');
-        page.className = `print-page ${showCuts ? 'show-cuts' : ''}`;
-        const grid = document.createElement('div');
-        grid.className = 'sheet-grid';
-
-        const empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.innerHTML = '<strong>Nessuna immagine caricata.</strong><br>Usa il pulsante “Carica immagini” oppure “Usa demo” per vedere subito il modulo impaginazione stampa.';
-        grid.appendChild(empty);
-        page.appendChild(grid);
-        pageShell.appendChild(page);
-        updateLayoutStats(dims);
-        return;
-      }
-
-      for (let i = 0; i < figures.length; i += perPage) {
-        const chunk = figures.slice(i, i + perPage);
-        
-        const page = document.createElement('div');
-        page.className = `print-page ${showCuts ? 'show-cuts' : ''}`;
-        
-        const grid = document.createElement('div');
-        grid.className = 'sheet-grid';
-
-        chunk.forEach((figure, index) => {
-          const node = template.content.firstElementChild.cloneNode(true);
-          const art = node.querySelector('.card-art');
-          const img = node.querySelector('img');
-
-          if (figure.src) {
-            img.src = figure.src;
-            art.classList.add('has-image');
-          } else if (figure.bg) {
-            art.style.background = figure.bg;
-          }
-
-          img.alt = figure.name ? `Figurina di ${figure.name}` : `Figurina ${i + index + 1}`;
-          grid.appendChild(node);
-        });
-
-        page.appendChild(grid);
-        pageShell.appendChild(page);
-      }
-
-      updateLayoutStats(dims);
-    }
-
-    loadImagesBtn.addEventListener('click', () => fileInput.click());
-
-    fileInput.addEventListener('change', async (event) => {
-      const files = Array.from(event.target.files || []);
-      if (!files.length) return;
-
-      const processedItems = [];
-      for (const file of files) {
-        const croppedItem = await processImageWithCenterCrop(file);
-        processedItems.push(croppedItem);
-      }
-
-      figures = processedItems;
-      renderFigures();
-    });
-
-    loadDemoBtn.addEventListener('click', () => {
-      figures = demoFigures.map(item => ({ ...item }));
-      renderFigures();
-    });
-
-    clearBtn.addEventListener('click', () => {
-      figures = [];
-      fileInput.value = '';
-      renderFigures();
-    });
-
-    async function waitForImages() {
-      const images = Array.from(pageShell.querySelectorAll('img'))
-        .filter(img => img.getAttribute('src'));
-
-      await Promise.all(images.map((img) => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-        return new Promise((resolve) => {
-          const done = () => resolve();
-          img.addEventListener('load', done, { once: true });
-          img.addEventListener('error', done, { once: true });
-        });
-      }));
-    }
-
-    printBtn.addEventListener('click', async () => {
-      updateVars();
-      renderFigures();
-      await waitForImages();
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          window.print();
-        });
-      });
-    });
-
-    Object.values(inputs).forEach((input) => {
-      const eventName = input.type === 'checkbox' ? 'change' : 'input';
-      input.addEventListener(eventName, () => {
-        updateVars();
-        renderFigures();
-      });
-    });
-
-    updateVars();
-    renderFigures();
-  </script>
-</body>
-</html>
