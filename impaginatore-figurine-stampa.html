@@ -2,7 +2,7 @@
 <html lang="it" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Impaginatore Figurine Stampa</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,14 +32,19 @@
     }
 
     * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      -webkit-text-size-adjust: 100%;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
 
     body {
       font-family: 'Inter', sans-serif;
       background: linear-gradient(180deg, #f8f5ef 0%, #efe8dc 100%);
       color: var(--text);
       min-height: 100vh;
-      -webkit-text-size-adjust: 100%; /* Evita zoom automatici strani su iOS */
     }
 
     .app {
@@ -272,7 +277,7 @@
     }
 
     .page-shell {
-      overflow-x: auto; /* Permette lo scrolling orizzontale sicuro su schermi piccoli senza tagliare */
+      overflow-x: auto;
       border-radius: 22px;
       background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(247,244,238,0.75));
       border: 1px solid var(--line);
@@ -285,7 +290,7 @@
 
     .print-page {
       width: calc(var(--page-w-mm) * 1mm);
-      min-width: calc(var(--page-w-mm) * 1mm); /* Evita che Safari mobile comprima il foglio */
+      min-width: calc(var(--page-w-mm) * 1mm);
       min-height: calc(var(--page-h-mm) * 1mm);
       height: calc(var(--page-h-mm) * 1mm);
       background: #fff;
@@ -420,7 +425,7 @@
 
     @page {
       size: A4 portrait;
-      margin: 0;
+      margin: 0mm;
     }
 
     @media (max-width: 1080px) {
@@ -431,7 +436,11 @@
     }
 
     @media print {
-      body { background: #fff; }
+      html, body {
+        width: 210mm;
+        height: 297mm;
+        background: #fff;
+      }
 
       .sidebar,
       .topbar,
@@ -459,9 +468,12 @@
       .print-page {
         width: 210mm !important;
         min-width: 210mm !important;
+        max-width: 210mm !important;
         height: 297mm !important;
         min-height: 297mm !important;
+        max-height: 297mm !important;
         margin: 0 !important;
+        padding: calc(var(--margin-mm) * 1mm) !important;
         box-shadow: none !important;
         page-break-after: always;
         break-after: page;
