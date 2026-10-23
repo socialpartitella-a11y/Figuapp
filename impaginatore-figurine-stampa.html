@@ -39,6 +39,7 @@
       background: linear-gradient(180deg, #f8f5ef 0%, #efe8dc 100%);
       color: var(--text);
       min-height: 100vh;
+      -webkit-text-size-adjust: 100%; /* Evita zoom automatici strani su iOS */
     }
 
     .app {
@@ -271,7 +272,7 @@
     }
 
     .page-shell {
-      overflow: auto;
+      overflow-x: auto; /* Permette lo scrolling orizzontale sicuro su schermi piccoli senza tagliare */
       border-radius: 22px;
       background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(247,244,238,0.75));
       border: 1px solid var(--line);
@@ -284,6 +285,7 @@
 
     .print-page {
       width: calc(var(--page-w-mm) * 1mm);
+      min-width: calc(var(--page-w-mm) * 1mm); /* Evita che Safari mobile comprima il foglio */
       min-height: calc(var(--page-h-mm) * 1mm);
       height: calc(var(--page-h-mm) * 1mm);
       background: #fff;
@@ -451,14 +453,16 @@
 
       .page-shell {
         display: block;
+        overflow: visible;
       }
 
       .print-page {
-        width: 210mm;
-        height: 297mm;
-        min-height: 297mm;
-        margin: 0;
-        box-shadow: none;
+        width: 210mm !important;
+        min-width: 210mm !important;
+        height: 297mm !important;
+        min-height: 297mm !important;
+        margin: 0 !important;
+        box-shadow: none !important;
         page-break-after: always;
         break-after: page;
         overflow: visible; 
@@ -689,7 +693,6 @@
       sheetStats.textContent = `${figures.length} immagini caricate. Capienza foglio: ${perPage} figurine. Pagine stimate: ${Math.ceil(Math.max(1, figures.length) / perPage)}`;
     }
 
-    // Funzione di Center Crop basata sul rapporto d'aspetto della figurina
     function processImageWithCenterCrop(file) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -702,7 +705,6 @@
             const cardW = Number(inputs.cardWidth.value) || 54;
             const cardH = Number(inputs.cardHeight.value) || 76;
             
-            // Fattore di scala ad alta definizione per la stampa (es. 10x pixel per mm)
             const scale = 10;
             const targetW = cardW * scale;
             const targetH = cardH * scale;
@@ -719,11 +721,9 @@
             let sY = 0;
 
             if (imgRatio > targetRatio) {
-              // Immagine più larga del target: ritaglia i lati (centrato)
               sWidth = img.naturalHeight * targetRatio;
               sX = (img.naturalWidth - sWidth) / 2;
             } else {
-              // Immagine più alta del target: ritaglia sopra e sotto (centrato)
               sHeight = img.naturalWidth / targetRatio;
               sY = (img.naturalHeight - sHeight) / 2;
             }
@@ -797,7 +797,6 @@
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
 
-      // Applica il crop centrale a tutte le immagini caricate
       const processedItems = [];
       for (const file of files) {
         const croppedItem = await processImageWithCenterCrop(file);
