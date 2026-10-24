@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Figuprint v1.0 - Partitella Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #141210;
+      --surface: #1e1b18;
+      --surface-light: #2b2621;
+      --panel: #24201c;
+      --text: #f5f2eb;
+      --muted: #a0978d;
+      --line: rgba(255,255,255,0.08);
+      --accent: #ff4200;
+      --accent-hover: #e03a00;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      min-height: 100vh;
+      width: 100vw;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--accent);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.2rem;
+      box-shadow: 0 6px 20px rgba(255, 66, 0, 0.35);
+      flex: 0 0 auto;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      line-height: 1.1;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .version-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(255, 66, 0, 0.15);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+    }
+
+    .brand-text p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(255, 66, 0, 0.25);
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .btn-secondary:hover { background: #38312b; }
+
+    .main {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 0; /* Impedisce ai flex items di sbordare */
+      overflow-y: auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .workspace {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      overflow-y: auto;
+    }
+
+    .page-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 10px 0;
+    }
+
+    .preview-card-container {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .preview-canvas {
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .empty-state {
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--surface);
+      width: 100%;
+    }
+
+    .hidden-input { display: none; }
+
+    .btn-download {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(255, 66, 0, 0.25);
+      width: 100%;
+    }
+    .btn-download:hover { background: var(--accent-hover); }
+
+    #statusOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 18, 16, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      display: none;
+      place-content: center;
+      text-align: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+      gap: 12px;
+      padding: 20px;
+    }
+
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="statusOverlay">Elaborazione in corso...</div>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">P</div>
+        <div class="brand-text">
+          <div style="display: flex; align-items: center;">
+            <h1>Figuprint</h1>
+            <span class="version-tag">v1.0</span>
+          </div>
+          <p>Partitella Canvas Engine</p>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2>Gestione Foto</h2>
+        <p>Carica le foto. Il motore nativo le importerà istantaneamente generando i fogli pronti.</p>
+        <div class="actions">
+          <button class="btn-primary" id="loadImagesBtn">Carica Immagini</button>
+        </div>
+        <input class="hidden-input" id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+      </section>
+
+      <section class="card">
+        <h2>Azioni</h2>
+        <p>Pulisci l'area di lavoro per iniziare una nuova composizione.</p>
+        <button class="btn-secondary" id="clearBtn">Svuota tutto</button>
+      </section>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h2>Fogli A4 Generati</h2>
+        <div class="badge-row">
+          <span class="badge" id="sheetStats">0 figurine caricate</span>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <div class="page-shell" id="pageShell">
+          <div class="empty-state">
+            <strong>Nessuna immagine caricata.</strong><br>Tocca “Carica Immagini” nella barra laterale.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const loadImagesBtn = document.getElementById('loadImagesBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const pageShell = document.getElementById('pageShell');
+    const sheetStats = document.getElementById('sheetStats');
+    const statusOverlay = document.getElementById('statusOverlay');
+
+    let figures = [];
+    const perPage = 9;
+
+    function showStatus(text) {
+      statusOverlay.textContent = text;
+      statusOverlay.style.display = 'grid';
+    }
+
+    function hideStatus() {
+      statusOverlay.style.display = 'none';
+    }
+
+    function updateStats() {
+      sheetStats.textContent = `${figures.length} figurine caricate`;
+    }
+
+    function processImage(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const targetW = 638;
+            const targetH = 898;
+
+            canvas.width = targetW;
+            canvas.height = targetH;
+
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const targetRatio = targetW / targetH;
+            let sWidth = img.naturalWidth, sHeight = img.naturalHeight, sX = 0, sY = 0;
+
+            if (imgRatio > targetRatio) {
+              sWidth = img.naturalHeight * targetRatio;
+              sX = (img.naturalWidth - sWidth) / 2;
+            } else {
+              sHeight = img.naturalWidth / targetRatio;
+              sY = (img.naturalHeight - sHeight) / 2;
+            }
+
+            ctx.drawImage(img, sX, sY, sWidth, sHeight, 0, 0, targetW, targetH);
+            resolve(canvas.toDataURL('image/jpeg', 0.95));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function generateA4Canvas(chunk, pageNum, totalPages) {
+      const a4Canvas = document.createElement('canvas');
+      a4Canvas.width = 2480;
+      a4Canvas.height = 3508;
+      const ctx = a4Canvas.getContext('2d');
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 2480, 3508);
+
+      ctx.fillStyle = '#111111';
+      ctx.font = '800 45px Inter, sans-serif';
+      ctx.fillText('Partitella Figurine - Edizione Speciale', 140, 180);
+
+      ctx.fillStyle = '#666666';
+      ctx.font = '600 38px Inter, sans-serif';
+      const currentDate = new Date().toLocaleDateString('it-IT');
+      ctx.textAlign = 'right';
+      ctx.fillText(`${currentDate} • Pagina ${pageNum} di ${totalPages}`, 2340, 180);
+      ctx.textAlign = 'left';
+
+      ctx.strokeStyle = '#ff4200';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(140, 230);
+      ctx.lineTo(2340, 230);
+      ctx.stroke();
+
+      const cols = 3;
+      const cardW = 638;
+      const cardH = 898;
+      const gapX = 120;
+      const gapY = 140;
+      const startX = (2480 - (cols * cardW + (cols - 1) * gapX)) / 2;
+      const startY = 360;
+
+      for (let index = 0; index < perPage; index++) {
+        const r = Math.floor(index / cols);
+        const c = index % cols;
+        const x = startX + c * (cardW + gapX);
+        const y = startY + r * (cardH + gapY);
+
+        if (index < chunk.length) {
+          await new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              ctx.drawImage(img, x, y, cardW, cardH);
+              ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(x, y, cardW, cardH);
+              resolve();
+            };
+            img.src = chunk[index];
+          });
+        } else {
+          ctx.fillStyle = '#f4f1ea';
+          ctx.fillRect(x, y, cardW, cardH);
+          ctx.strokeStyle = '#dcd5cc';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x, y, cardW, cardH);
+
+          ctx.fillStyle = 'rgba(0,0,0,0.3)';
+          ctx.font = '700 36px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('Slot Vuoto', x + cardW / 2, y + cardH / 2);
+          ctx.textAlign = 'left';
+        }
+
+        drawCutMarks(ctx, x, y, cardW, cardH);
+      }
+
+      return a4Canvas.toDataURL('image/png', 1.0);
+    }
+
+    function drawCutMarks(ctx, x, y, w, h) {
+      const len = 45;
+      const offset = 20;
+
+      ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(x - offset - len, y - offset); ctx.lineTo(x - offset, y - offset);
+      ctx.moveTo(x - offset, y - offset - len); ctx.lineTo(x - offset, y - offset);
+      
+      ctx.moveTo(x + w + offset, y - offset); ctx.lineTo(x + w + offset + len, y - offset);
+      ctx.moveTo(x + w + offset, y - offset - len); ctx.lineTo(x + w + offset, y - offset);
+      
+      ctx.moveTo(x - offset - len, y + h + offset); ctx.lineTo(x - offset, y + h + offset);
+      ctx.moveTo(x - offset, y + h + offset); ctx.lineTo(x - offset, y + h + offset + len);
+      
+      ctx.moveTo(x + w + offset, y + h + offset); ctx.lineTo(x + w + offset + len, y + h + offset);
+      ctx.moveTo(x + w + offset, y + h + offset); ctx.lineTo(x + w + offset, y + h + offset + len);
+      ctx.stroke();
+    }
+
+    async function renderAllSheets() {
+      if (!figures.length) {
+        pageShell.innerHTML = `
+          <div class="empty-state">
+            <strong>Nessuna immagine caricata.</strong><br>Tocca “Carica Immagini” nella barra laterale.
+          </div>`;
+        updateStats();
+        return;
+      }
+
+      showStatus("Generazione fogli in corso...");
+      pageShell.innerHTML = '';
+      const totalPages = Math.ceil(figures.length / perPage);
+
+      for (let i = 0; i < figures.length; i += perPage) {
+        const chunk = figures.slice(i, i + perPage);
+        const pageNum = Math.floor(i / perPage) + 1;
+
+        showStatus(`Generazione Pagina ${pageNum} di ${totalPages}...`);
+        const dataUrl = await generateA4Canvas(chunk, pageNum, totalPages);
+
+        const container = document.createElement('div');
+        container.className = 'preview-card-container';
+
+        const canvasImg = document.createElement('img');
+        canvasImg.className = 'preview-canvas';
+        canvasImg.src = dataUrl;
+        container.appendChild(canvasImg);
+
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn-download';
+        downloadBtn.textContent = `📥 Scarica Pagina ${pageNum} (${pageNum}/${totalPages})`;
+        downloadBtn.addEventListener('click', () => {
+          const link = document.createElement('a');
+          link.download = `Partitella_Figurine_Pagina_${pageNum}.png`;
+          link.href = dataUrl;
+          link.click();
+        });
+        container.appendChild(downloadBtn);
+
+        pageShell.appendChild(container);
+      }
+
+      hideStatus();
+      updateStats();
+    }
+
+    loadImagesBtn.addEventListener('click', () => {
+      fileInput.value = '';
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async (event) => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      showStatus(`Elaborazione ${files.length} foto in corso...`);
+      for (const [index, file] of files.entries()) {
+        showStatus(`Ritaglio foto ${index + 1} di ${files.length}...`);
+        const croppedDataUrl = await processImage(file);
+        figures.push(croppedDataUrl);
+      }
+
+      await renderAllSheets();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      figures = [];
+      fileInput.value = '';
+      renderAllSheets();
+    });
+
+    updateStats();
+  </script>
+</body>
+</html>
