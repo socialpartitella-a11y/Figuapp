@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Impaginatore Figurine Partitella v1.8</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --surface: #fcfbf8;
+      --panel: #ffffff;
+      --text: #221f1a;
+      --muted: #6d675d;
+      --line: rgba(34,31,26,0.12);
+      --accent: #0c6b63;
+      --accent-hover: #09524c;
+      --shadow: 0 12px 40px rgba(37, 27, 15, 0.10);
+      --radius: 18px;
+      --page-w-mm: 210;
+      --page-h-mm: 297;
+      --card-w-mm: 54;
+      --card-h-mm: 76;
+      --margin-mm: 10;
+      --gap-mm: 6;
+      --cut-color: rgba(0,0,0,0.35);
+      --cut-length-mm: 4;
+      --cut-offset-mm: 2;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, #f8f5ef 0%, #efe8dc 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: rgba(252, 251, 248, 0.94);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--line);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Logo Partitella integrato */
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0c6b63, #12463f);
+      display: grid;
+      place-items: center;
+      color: white;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(12,107,99,0.3);
+      flex: 0 0 auto;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-text h1 {
+      font-size: 1.1rem;
+      line-height: 1.1;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .version-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(12,107,99,0.12);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .brand-text p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.85);
+      border: 1px solid var(--line);
+      box-shadow: 0 6px 18px rgba(52, 40, 25, 0.04);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(12,107,99,0.5);
+      box-shadow: 0 0 0 3px rgba(12,107,99,0.08);
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+      margin-top: 10px;
+    }
+
+    .toggle label {
+      font-size: 0.85rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 150ms ease, background 150ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(12,107,99,0.22);
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .main {
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .workspace {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(34,31,26,0.08);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .page-shell {
+      overflow: auto;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(247,244,238,0.8));
+      border: 1px solid var(--line);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    /* Foglio A4 reale */
+    .print-page {
+      width: calc(var(--page-w-mm) * 1mm);
+      min-width: calc(var(--page-w-mm) * 1mm);
+      height: calc(var(--page-h-mm) * 1mm);
+      min-height: calc(var(--page-h-mm) * 1mm);
+      background: #fff;
+      position: relative;
+      box-shadow: 0 16px 48px rgba(26,20,12,0.12);
+      padding: calc(var(--margin-mm) * 1mm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Intestazione accattivante su ogni pagina */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 4mm;
+      margin-bottom: 4mm;
+      font-size: 3.2mm;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .page-header-title {
+      font-weight: 800;
+      color: var(--text);
+      font-size: 3.8mm;
+      letter-spacing: -0.02em;
+    }
+
+    .sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(var(--dynamic-cols, 3), calc(var(--card-w-mm) * 1mm));
+      grid-template-rows: repeat(var(--dynamic-rows, 3), calc(var(--card-h-mm) * 1mm));
+      gap: calc(var(--gap-mm) * 1mm);
+      justify-content: center;
+      align-content: center;
+      flex: 1;
+    }
+
+    .print-card-wrap {
+      width: calc(var(--card-w-mm) * 1mm);
+      height: calc(var(--card-h-mm) * 1mm);
+      position: relative;
+    }
+
+    /* Segni di taglio geometrici */
+    .cut-mark {
+      position: absolute;
+      background: var(--cut-color);
+      pointer-events: none;
+      display: none;
+    }
+    .show-cuts .cut-mark { display: block; }
+
+    .cut-h { width: calc(var(--cut-length-mm) * 1mm); height: 0.2mm; }
+    .cut-v { width: 0.2mm; height: calc(var(--cut-length-mm) * 1mm); }
+
+    .cut-top-left-h { left: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); top: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-top-left-v { left: calc(var(--cut-offset-mm) * -1mm); top: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+    .cut-top-right-h { right: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); top: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-top-right-v { right: calc(var(--cut-offset-mm) * -1mm); top: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+    .cut-bottom-left-h { left: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); bottom: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-bottom-left-v { left: calc(var(--cut-offset-mm) * -1mm); bottom: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+    .cut-bottom-right-h { right: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); bottom: calc(var(--cut-offset-mm) * -1mm); }
+    .cut-bottom-right-v { right: calc(var(--cut-offset-mm) * -1mm); bottom: calc(var(--cut-offset-mm) * -1mm - var(--cut-length-mm) * 1mm); }
+
+    .print-card {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      background: #fff;
+    }
+
+    .card-art {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .card-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .card-art.has-image img { display: block; }
+
+    .card-placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 6mm;
+      color: rgba(34,31,26,0.4);
+      text-align: center;
+      font-weight: 700;
+      font-size: 3.5mm;
+      background: #f7f4ee;
+    }
+    .card-art.has-image .card-placeholder { display: none; }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      color: var(--muted);
+      background: #faf8f5;
+      display: grid;
+      place-content: center;
+      height: 100%;
+    }
+
+    .hidden-input { display: none; }
+
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .main { padding: 16px; }
+      .print-page {
+        transform: scale(0.68);
+        transform-origin: top center;
+        margin-bottom: -90px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">P</div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <h1>Partitella Figurine</h1>
+            <span class="version-tag">v1.8</span>
+          </div>
+          <p>Impaginatore ufficiale stampa A4</p>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2>Carica Foto</h2>
+        <p>Seleziona le immagini PNG o JPG dal tuo iPhone o computer. Verranno centrate e ritagliate automaticamente.</p>
+        <div class="actions">
+          <button class="btn-primary" id="loadImagesBtn">Carica immagini</button>
+        </div>
+        <input class="hidden-input" id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+      </section>
+
+      <section class="card controls">
+        <h2>Parametri foglio</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="pageWidth">Larghezza (mm)</label>
+            <input id="pageWidth" type="number" value="210">
+          </div>
+          <div class="field">
+            <label for="pageHeight">Altezza (mm)</label>
+            <input id="pageHeight" type="number" value="297">
+          </div>
+          <div class="field">
+            <label for="cardWidth">Base fig. (mm)</label>
+            <input id="cardWidth" type="number" step="0.5" value="54">
+          </div>
+          <div class="field">
+            <label for="cardHeight">Altezza fig. (mm)</label>
+            <input id="cardHeight" type="number" step="0.5" value="76">
+          </div>
+          <div class="field">
+            <label for="margin">Margine (mm)</label>
+            <input id="margin" type="number" step="0.5" value="10">
+          </div>
+          <div class="field">
+            <label for="gap">Spazio (mm)</label>
+            <input id="gap" type="number" step="0.5" value="6">
+          </div>
+          <div class="field full">
+            <label for="sheetTitle">Titolo intestazione foglio</label>
+            <input id="sheetTitle" type="text" value="Partitella - Edizione Speciale Figurine">
+          </div>
+        </div>
+
+        <div class="toggle">
+          <label for="showCuts">Mostra segni di taglio</label>
+          <input id="showCuts" type="checkbox" checked>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="printBtn">Stampa / Esporta PDF</button>
+          <button class="btn-secondary" id="clearBtn">Svuota tutto</button>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2 id="sheetTitleView">Partitella - Edizione Speciale Figurine</h2>
+        </div>
+        <div class="badge-row">
+          <span class="badge" id="layoutBadge">0 colonne × 0 righe</span>
+          <span class="badge" id="sheetStats">0 figurine</span>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <div class="page-shell" id="pageShell"></div>
+      </div>
+    </main>
+  </div>
+
+  <template id="cardTemplate">
+    <article class="print-card-wrap">
+      <span class="cut-mark cut-h cut-top-left-h"></span>
+      <span class="cut-mark cut-v cut-top-left-v"></span>
+      <span class="cut-mark cut-h cut-top-right-h"></span>
+      <span class="cut-mark cut-v cut-top-right-v"></span>
+      <span class="cut-mark cut-h cut-bottom-left-h"></span>
+      <span class="cut-mark cut-v cut-bottom-left-v"></span>
+      <span class="cut-mark cut-h cut-bottom-right-h"></span>
+      <span class="cut-mark cut-v cut-bottom-right-v"></span>
+      <div class="print-card">
+        <div class="card-art">
+          <img alt="Figurina" loading="lazy" decoding="async">
+          <div class="card-placeholder">Carica foto</div>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const loadImagesBtn = document.getElementById('loadImagesBtn');
+    const printBtn = document.getElementById('printBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const pageShell = document.getElementById('pageShell');
+    const template = document.getElementById('cardTemplate');
+    const sheetStats = document.getElementById('sheetStats');
+    const layoutBadge = document.getElementById('layoutBadge');
+    const sheetTitleView = document.getElementById('sheetTitleView');
+
+    const inputs = {
+      pageWidth: document.getElementById('pageWidth'),
+      pageHeight: document.getElementById('pageHeight'),
+      cardWidth: document.getElementById('cardWidth'),
+      cardHeight: document.getElementById('cardHeight'),
+      margin: document.getElementById('margin'),
+      gap: document.getElementById('gap'),
+      showCuts: document.getElementById('showCuts'),
+      sheetTitle: document.getElementById('sheetTitle')
+    };
+
+    let figures = [];
+
+    function getGridDimensions() {
+      const pageWidth = Number(inputs.pageWidth.value) || 210;
+      const pageHeight = Number(inputs.pageHeight.value) || 297;
+      const cardWidth = Number(inputs.cardWidth.value) || 54;
+      const cardHeight = Number(inputs.cardHeight.value) || 76;
+      const margin = Number(inputs.margin.value) || 10;
+      const gap = Number(inputs.gap.value) || 6;
+
+      const usableWidth = pageWidth - (margin * 2);
+      const usableHeight = pageHeight - (margin * 2) - 15; // Riserva spazio per l'intestazione
+      
+      const cols = Math.max(1, Math.floor((usableWidth + gap) / (cardWidth + gap)));
+      const rows = Math.max(1, Math.floor((usableHeight + gap) / (cardHeight + gap)));
+
+      return { pageWidth, pageHeight, cardWidth, cardHeight, margin, gap, cols, rows };
+    }
+
+    function updateVars() {
+      const dims = getGridDimensions();
+      document.documentElement.style.setProperty('--page-w-mm', dims.pageWidth);
+      document.documentElement.style.setProperty('--page-h-mm', dims.pageHeight);
+      document.documentElement.style.setProperty('--card-w-mm', dims.cardWidth);
+      document.documentElement.style.setProperty('--card-h-mm', dims.cardHeight);
+      document.documentElement.style.setProperty('--margin-mm', dims.margin);
+      document.documentElement.style.setProperty('--gap-mm', dims.gap);
+      document.documentElement.style.setProperty('--dynamic-cols', dims.cols);
+      document.documentElement.style.setProperty('--dynamic-rows', dims.rows);
+
+      sheetTitleView.textContent = inputs.sheetTitle.value.trim() || 'Partitella Figurine';
+      updateLayoutStats(dims);
+    }
+
+    function updateLayoutStats(dims) {
+      const perPage = dims.cols * dims.rows;
+      layoutBadge.textContent = `${dims.cols} col × ${dims.rows} righe`;
+      sheetStats.textContent = `${figures.length} figurine`;
+    }
+
+    function processImageWithCenterCrop(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const cardW = Number(inputs.cardWidth.value) || 54;
+            const cardH = Number(inputs.cardHeight.value) || 76;
+            const scale = 10;
+            const targetW = cardW * scale;
+            const targetH = cardH * scale;
+
+            canvas.width = targetW;
+            canvas.height = targetH;
+
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const targetRatio = targetW / targetH;
+            let sWidth = img.naturalWidth, sHeight = img.naturalHeight, sX = 0, sY = 0;
+
+            if (imgRatio > targetRatio) {
+              sWidth = img.naturalHeight * targetRatio;
+              sX = (img.naturalWidth - sWidth) / 2;
+            } else {
+              sHeight = img.naturalWidth / targetRatio;
+              sY = (img.naturalHeight - sHeight) / 2;
+            }
+
+            ctx.drawImage(img, sX, sY, sWidth, sHeight, 0, 0, targetW, targetH);
+            resolve({ src: canvas.toDataURL('image/jpeg', 0.92) });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderFigures() {
+      pageShell.innerHTML = '';
+      const dims = getGridDimensions();
+      const perPage = dims.cols * dims.rows;
+      const showCuts = inputs.showCuts.checked;
+      const totalPages = Math.ceil(figures.length / perPage) || 1;
+      const currentDate = new Date().toLocaleDateString('it-IT');
+      const sheetTitle = inputs.sheetTitle.value.trim() || 'Partitella Figurine';
+
+      if (!figures.length) {
+        const page = document.createElement('div');
+        page.className = `print-page ${showCuts ? 'show-cuts' : ''}`;
+        
+        // Header pagina
+        const header = document.createElement('div');
+        header.className = 'page-header';
+        header.innerHTML = `<span class="page-header-title">${sheetTitle}</span><span>${currentDate} • Pagina 1 di 1</span>`;
+        page.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'sheet-grid';
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = '<strong>Nessuna immagine caricata.</strong><br>Tocca “Carica immagini” per iniziare.';
+        grid.appendChild(empty);
+        page.appendChild(grid);
+        pageShell.appendChild(page);
+        updateLayoutStats(dims);
+        return;
+      }
+
+      for (let i = 0; i < figures.length; i += perPage) {
+        const chunk = figures.slice(i, i + perPage);
+        const pageNum = Math.floor(i / perPage) + 1;
+
+        const page = document.createElement('div');
+        page.className = `print-page ${showCuts ? 'show-cuts' : ''}`;
+
+        // Header dinamico con data e numero pagina
+        const header = document.createElement('div');
+        header.className = 'page-header';
+        header.innerHTML = `<span class="page-header-title">${sheetTitle}</span><span>${currentDate} • Pagina ${pageNum} di ${totalPages}</span>`;
+        page.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'sheet-grid';
+
+        chunk.forEach((figure, index) => {
+          const node = template.content.firstElementChild.cloneNode(true);
+          const art = node.querySelector('.card-art');
+          const img = node.querySelector('img');
+
+          if (figure.src) {
+            img.src = figure.src;
+            art.classList.add('has-image');
+          }
+          grid.appendChild(node);
+        });
+
+        page.appendChild(grid);
+        pageShell.appendChild(page);
+      }
+
+      updateLayoutStats(dims);
+    }
+
+    loadImagesBtn.addEventListener('click', () => {
+      fileInput.value = '';
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async (event) => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      const processedItems = [];
+      for (const file of files) {
+        const croppedItem = await processImageWithCenterCrop(file);
+        processedItems.push(croppedItem);
+      }
+
+      figures = figures.concat(processedItems);
+      renderFigures();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      figures = [];
+      fileInput.value = '';
+      renderFigures();
+    });
+
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+
+    Object.values(inputs).forEach((input) => {
+      const eventName = input.type === 'checkbox' ? 'change' : 'input';
+      input.addEventListener(eventName, () => {
+        updateVars();
+        renderFigures();
+      });
+    });
+
+    updateVars();
+    renderFigures();
+  </script>
+</body>
+</html>
