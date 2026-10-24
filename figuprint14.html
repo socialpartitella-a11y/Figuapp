@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Figuprint v1.4 - Partitella</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #141210;
+      --surface: #1e1b18;
+      --surface-light: #2b2621;
+      --panel: #24201c;
+      --text: #f5f2eb;
+      --muted: #a0978d;
+      --line: rgba(255,255,255,0.08);
+      --accent: #ff4200;
+      --accent-hover: #e03a00;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--accent);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      font-size: 1.2rem;
+      box-shadow: 0 6px 20px rgba(255, 66, 0, 0.35);
+      flex: 0 0 auto;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      line-height: 1.1;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .version-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(255, 66, 0, 0.15);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+    }
+
+    .brand-text p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(255, 66, 0, 0.25);
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .btn-secondary:hover { background: #38312b; }
+
+    .main {
+      padding: 24px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .workspace {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: auto;
+    }
+
+    .page-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      align-items: center;
+      width: 100%;
+      padding: 10px 0;
+    }
+
+    /* Contenitore foglio + pulsante di download dedicato */
+    .print-page-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .print-page {
+      width: 210mm;
+      min-width: 210mm;
+      height: 297mm;
+      min-height: 297mm;
+      background: #fff;
+      color: #222;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      padding: 10mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transform-origin: top center;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 4mm;
+      margin-bottom: 4mm;
+      font-size: 3.2mm;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .page-header-title {
+      font-weight: 800;
+      color: #111;
+      font-size: 4mm;
+    }
+
+    .sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 54mm);
+      grid-template-rows: repeat(3, 76mm);
+      gap: 6mm;
+      justify-content: center;
+      align-content: center;
+      flex: 1;
+    }
+
+    .print-card-wrap {
+      width: 54mm;
+      height: 76mm;
+      position: relative;
+    }
+
+    .cut-mark {
+      position: absolute;
+      background: rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+
+    .cut-h { width: 4mm; height: 0.2mm; }
+    .cut-v { width: 0.2mm; height: 4mm; }
+
+    .cut-top-left-h { left: -6.2mm; top: -2mm; }
+    .cut-top-left-v { left: -2mm; top: -6.2mm; }
+    .cut-top-right-h { right: -6.2mm; top: -2mm; }
+    .cut-top-right-v { right: -2mm; top: -6.2mm; }
+    .cut-bottom-left-h { left: -6.2mm; bottom: -2mm; }
+    .cut-bottom-left-v { left: -2mm; bottom: -6.2mm; }
+    .cut-bottom-right-h { right: -6.2mm; bottom: -2mm; }
+    .cut-bottom-right-v { right: -2mm; bottom: -6.2mm; }
+
+    .print-card {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: #fff;
+    }
+
+    .card-art {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .card-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .card-art.has-image img { display: block; }
+
+    .card-placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 6mm;
+      color: rgba(0,0,0,0.35);
+      text-align: center;
+      font-weight: 700;
+      font-size: 3.5mm;
+      background: #f4f1ea;
+    }
+    .card-art.has-image .card-placeholder { display: none; }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--surface);
+      display: grid;
+      place-content: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .hidden-input { display: none; }
+
+    /* Pulsante di download ben visibile sotto ogni foglio */
+    .btn-download-page {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(255, 66, 0, 0.25);
+      margin-bottom: 20px;
+    }
+    .btn-download-page:hover { background: var(--accent-hover); }
+
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .main { padding: 16px; }
+      
+      .print-page {
+        transform: scale(0.48);
+        margin-bottom: -150px;
+      }
+    }
+    
+    @media (min-width: 480px) and (max-width: 1080px) {
+      .print-page {
+        transform: scale(0.62);
+        margin-bottom: -110px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">P</div>
+        <div class="brand-text">
+          <div style="display: flex; align-items: center;">
+            <h1>Figuprint</h1>
+            <span class="version-tag">v1.0</span>
+          </div>
+          <p>Partitella Print Engine</p>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2>Gestione Foto</h2>
+        <p>Carica le tue figurine pronte. Verranno centrate, ritagliate automaticamente e impaginate su A4.</p>
+        <div class="actions">
+          <button class="btn-primary" id="loadImagesBtn">Carica Immagini</button>
+        </div>
+        <input class="hidden-input" id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+      </section>
+
+      <section class="card">
+        <h2>Azioni</h2>
+        <p>Svuota il foglio di lavoro se vuoi iniziare una nuova composizione da zero.</p>
+        <button class="btn-secondary" id="clearBtn">Svuota tutto</button>
+      </section>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h2>Anteprima Fogli A4</h2>
+        <div class="badge-row">
+          <span class="badge" id="sheetStats">0 figurine caricate</span>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <div class="page-shell" id="pageShell"></div>
+      </div>
+    </main>
+  </div>
+
+  <template id="cardTemplate">
+    <article class="print-card-wrap">
+      <span class="cut-mark cut-h cut-top-left-h"></span>
+      <span class="cut-mark cut-v cut-top-left-v"></span>
+      <span class="cut-mark cut-h cut-top-right-h"></span>
+      <span class="cut-mark cut-v cut-top-right-v"></span>
+      <span class="cut-mark cut-h cut-bottom-left-h"></span>
+      <span class="cut-mark cut-v cut-bottom-left-v"></span>
+      <span class="cut-mark cut-h cut-bottom-right-h"></span>
+      <span class="cut-mark cut-v cut-bottom-right-v"></span>
+      <div class="print-card">
+        <div class="card-art">
+          <img alt="Figurina" loading="lazy" decoding="async">
+          <div class="card-placeholder">Slot vuoto</div>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const loadImagesBtn = document.getElementById('loadImagesBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const pageShell = document.getElementById('pageShell');
+    const template = document.getElementById('cardTemplate');
+    const sheetStats = document.getElementById('sheetStats');
+
+    let figures = [];
+    const perPage = 9;
+
+    function updateStats() {
+      sheetStats.textContent = `${figures.length} figurine caricate`;
+    }
+
+    function processImageWithCenterCrop(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const targetW = 540;
+            const targetH = 760;
+
+            canvas.width = targetW;
+            canvas.height = targetH;
+
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const targetRatio = targetW / targetH;
+            let sWidth = img.naturalWidth, sHeight = img.naturalHeight, sX = 0, sY = 0;
+
+            if (imgRatio > targetRatio) {
+              sWidth = img.naturalHeight * targetRatio;
+              sX = (img.naturalWidth - sWidth) / 2;
+            } else {
+              sHeight = img.naturalWidth / targetRatio;
+              sY = (img.naturalHeight - sHeight) / 2;
+            }
+
+            ctx.drawImage(img, sX, sY, sWidth, sHeight, 0, 0, targetW, targetH);
+            resolve({ src: canvas.toDataURL('image/jpeg', 0.92) });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function downloadPageImage(pageElement, pageNum) {
+      const originalTransform = pageElement.style.transform;
+      pageElement.style.transform = 'none';
+
+      const canvas = await html2canvas(pageElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+
+      pageElement.style.transform = originalTransform;
+
+      const link = document.createElement('a');
+      link.download = `Partitella_Figurine_Pagina_${pageNum}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function renderFigures() {
+      pageShell.innerHTML = '';
+      const totalPages = Math.ceil(figures.length / perPage) || 1;
+      const currentDate = new Date().toLocaleDateString('it-IT');
+
+      if (!figures.length) {
+        const container = document.createElement('div');
+        container.className = 'print-page-container';
+
+        const page = document.createElement('div');
+        page.className = 'print-page';
+        
+        const header = document.createElement('div');
+        header.className = 'page-header';
+        header.innerHTML = `<span class="page-header-title">Partitella Figurine - Edizione Speciale</span><span>${currentDate} • Pagina 1 di 1</span>`;
+        page.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'sheet-grid';
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = '<strong>Nessuna immagine caricata.</strong><br>Tocca “Carica Immagini” per iniziare.';
+        grid.appendChild(empty);
+        page.appendChild(grid);
+        container.appendChild(page);
+        pageShell.appendChild(container);
+        updateStats();
+        return;
+      }
+
+      for (let i = 0; i < figures.length; i += perPage) {
+        const chunk = figures.slice(i, i + perPage);
+        const pageNum = Math.floor(i / perPage) + 1;
+
+        const container = document.createElement('div');
+        container.className = 'print-page-container';
+
+        const page = document.createElement('div');
+        page.className = 'print-page';
+        page.id = `sheet-page-${pageNum}`;
+
+        const header = document.createElement('div');
+        header.className = 'page-header';
+        header.innerHTML = `<span class="page-header-title">Partitella Figurine - Edizione Speciale</span><span>${currentDate} • Pagina ${pageNum} di ${totalPages}</span>`;
+        page.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'sheet-grid';
+
+        chunk.forEach((figure, index) => {
+          const node = template.content.firstElementChild.cloneNode(true);
+          const art = node.querySelector('.card-art');
+          const img = node.querySelector('img');
+
+          if (figure.src) {
+            img.src = figure.src;
+            art.classList.add('has-image');
+          }
+          grid.appendChild(node);
+        });
+
+        const remaining = perPage - chunk.length;
+        for(let r = 0; r < remaining; r++) {
+          const node = template.content.firstElementChild.cloneNode(true);
+          grid.appendChild(node);
+        }
+
+        page.appendChild(grid);
+        container.appendChild(page);
+
+        // Pulsante di download ben visibile sotto ciascun foglio
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn-download-page';
+        downloadBtn.textContent = `📥 Scarica Pagina ${pageNum} come Immagine PNG`;
+        downloadBtn.addEventListener('click', () => downloadPageImage(page, pageNum));
+        container.appendChild(downloadBtn);
+
+        pageShell.appendChild(container);
+      }
+
+      updateStats();
+    }
+
+    loadImagesBtn.addEventListener('click', () => {
+      fileInput.value = '';
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async (event) => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      for (const file of files) {
+        const croppedItem = await processImageWithCenterCrop(file);
+        figures.push(croppedItem);
+      }
+
+      renderFigures();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      figures = [];
+      fileInput.value = '';
+      renderFigures();
+    });
+
+    renderFigures();
+  </script>
+</body>
+</html>
